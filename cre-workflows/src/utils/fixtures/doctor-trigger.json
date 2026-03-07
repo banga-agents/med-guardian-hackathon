@@ -1,0 +1,6 @@
+{
+  "doctorAddress": "0x0000000000000000000000000000000000000d01",
+  "patientId": "emma",
+  "queryType": "reports",
+  "requestId": "req-emma-dr_patel-demo-01"
+}

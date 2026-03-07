@@ -1,0 +1,7 @@
+{
+  "patient": "0x1111111111111111111111111111111111111111",
+  "reportHash": "0xa18b5c2c1f70c29d3f7313c8cddd541e0f0b3f1f7a1e0648c2c8d143d6e23a11",
+  "encryptedCid": "bafybeiaw5signalhashkgj6ci6dy3bfrs4jm6cdpxb7z3a6tgfslp6u32p4e",
+  "generatedAt": 1739558400000,
+  "gasLimit": "550000"
+}

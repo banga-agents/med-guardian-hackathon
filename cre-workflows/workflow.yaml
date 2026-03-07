@@ -1,0 +1,56 @@
+# MedGuardian CRE Workflow Configuration
+# Chainlink Runtime Environment Workflow Definition
+
+name: medguardian-health-workflow
+version: 1.0.0
+description: Privacy-preserving health data management workflow
+owner: "0x95141F6bBC50022d8fadC957D5bc8534cFBAc7de"
+
+# Workflow build configuration
+build:
+  entrypoint: src/index.ts
+  target: wasm32-unknown-unknown
+
+# Secrets configuration
+secrets-path: "../secrets.yaml"
+
+# Trigger configurations
+triggers:
+  - name: health
+    type: http
+    config:
+      method: POST
+      path: /api/health/log
+      
+  - name: reportGeneration
+    type: cron
+    config:
+      schedule: "0 0 * * *"  # Daily at midnight UTC
+      
+  - name: doctor
+    type: http
+    config:
+      method: POST
+      path: /api/doctor/access-request
+      
+  - name: dispatch
+    type: http
+    config:
+      method: POST
+      path: /api/report/dispatch
+      
+  - name: accessRevoked
+    type: evm_log
+    config:
+      chainSelector: "ethereum-testnet-sepolia"
+      contractAddress: ""  # Filled from config
+      eventSignature: "AccessRevoked(address,address)"
+
+# Capability requirements
+capabilities:
+  - http
+  - confidential_http
+  - evm_read
+  - evm_write
+  - cron
+  - evm_log

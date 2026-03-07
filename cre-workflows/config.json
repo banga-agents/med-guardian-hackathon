@@ -1,0 +1,127 @@
+{
+  "schemaVersion": "1.0",
+  "workflows": [
+    {
+      "name": "health",
+      "description": "Receives encrypted health logs from patients",
+      "trigger": {
+        "type": "http",
+        "config": {
+          "method": "POST",
+          "path": "/api/health/log"
+        }
+      },
+      "config": {
+        "healthApiEndpoint": "https://api.medguardian.health/v1/process",
+        "storageApi": "https://storage.medguardian.health",
+        "aiEndpoint": "https://api.openai.com/v1",
+        "chainSelector": "ethereum-testnet-sepolia",
+        "accessControlContract": "0x76aAbBC9125F4642F8A510f4615112DC9F58f07B",
+        "reportRegistryContract": "0xA52986d362889aeF7075DD68325859c1D8a581Ac",
+        "consumerAddress": "0xA52986d362889aeF7075DD68325859c1D8a581Ac",
+        "tenderlyRpcUrl": "https://virtual.mainnet.rpc.tenderly.co/v1/WORKSPACE/VTN",
+        "tenderlyExplorerBase": "https://dashboard.tenderly.co/tx/ethereum-testnet-sepolia",
+        "allowHttpFallback": true,
+        "confidentialSummaryHeaderName": "X-CRE-Service-Key",
+        "owner": "0x95141F6bBC50022d8fadC957D5bc8534cFBAc7de"
+      }
+    },
+    {
+      "name": "reportGeneration",
+      "description": "Generates AI-powered health reports daily",
+      "trigger": {
+        "type": "cron",
+        "config": {
+          "schedule": "0 0 * * *"
+        }
+      },
+      "config": {
+        "storageApi": "https://storage.medguardian.health",
+        "aiEndpoint": "https://api.openai.com/v1",
+        "healthApiEndpoint": "https://api.medguardian.health/v1/process",
+        "chainSelector": "ethereum-testnet-sepolia",
+        "reportRegistryContract": "0xA52986d362889aeF7075DD68325859c1D8a581Ac",
+        "consumerAddress": "0xA52986d362889aeF7075DD68325859c1D8a581Ac",
+        "accessControlContract": "0x76aAbBC9125F4642F8A510f4615112DC9F58f07B",
+        "tenderlyRpcUrl": "https://virtual.mainnet.rpc.tenderly.co/v1/WORKSPACE/VTN",
+        "tenderlyExplorerBase": "https://dashboard.tenderly.co/tx/ethereum-testnet-sepolia",
+        "allowHttpFallback": true,
+        "confidentialSummaryHeaderName": "X-CRE-Service-Key",
+        "owner": "0x95141F6bBC50022d8fadC957D5bc8534cFBAc7de"
+      }
+    },
+    {
+      "name": "doctor",
+      "description": "Handles authorized doctor report requests",
+      "trigger": {
+        "type": "http",
+        "config": {
+          "method": "POST",
+          "path": "/api/doctor/access-request"
+        }
+      },
+      "config": {
+        "storageApi": "https://storage.medguardian.health",
+        "healthApiEndpoint": "https://api.medguardian.health/v1/process",
+        "chainSelector": "ethereum-testnet-sepolia",
+        "accessControlContract": "0x76aAbBC9125F4642F8A510f4615112DC9F58f07B",
+        "consumerAddress": "0xA52986d362889aeF7075DD68325859c1D8a581Ac",
+        "reportRegistryContract": "0xA52986d362889aeF7075DD68325859c1D8a581Ac",
+        "tenderlyRpcUrl": "https://virtual.mainnet.rpc.tenderly.co/v1/WORKSPACE/VTN",
+        "tenderlyExplorerBase": "https://dashboard.tenderly.co/tx/ethereum-testnet-sepolia",
+        "allowHttpFallback": true,
+        "confidentialSummaryHeaderName": "X-CRE-Service-Key",
+        "owner": "0x95141F6bBC50022d8fadC957D5bc8534cFBAc7de"
+      }
+    },
+    {
+      "name": "dispatch",
+      "description": "Commits attested report payloads on-chain",
+      "trigger": {
+        "type": "http",
+        "config": {
+          "method": "POST",
+          "path": "/api/report/dispatch"
+        }
+      },
+      "config": {
+        "storageApi": "https://storage.medguardian.health",
+        "healthApiEndpoint": "https://api.medguardian.health/v1/process",
+        "chainSelector": "ethereum-testnet-sepolia",
+        "accessControlContract": "0x76aAbBC9125F4642F8A510f4615112DC9F58f07B",
+        "reportRegistryContract": "0xA52986d362889aeF7075DD68325859c1D8a581Ac",
+        "consumerAddress": "0xA52986d362889aeF7075DD68325859c1D8a581Ac",
+        "tenderlyRpcUrl": "https://virtual.mainnet.rpc.tenderly.co/v1/WORKSPACE/VTN",
+        "tenderlyExplorerBase": "https://dashboard.tenderly.co/tx/ethereum-testnet-sepolia",
+        "allowHttpFallback": true,
+        "confidentialSummaryHeaderName": "X-CRE-Service-Key",
+        "owner": "0x95141F6bBC50022d8fadC957D5bc8534cFBAc7de"
+      }
+    },
+    {
+      "name": "accessRevoked",
+      "description": "Processes access revocation events",
+      "trigger": {
+        "type": "evm_log",
+        "config": {
+          "chainSelector": "ethereum-testnet-sepolia",
+          "contractAddress": "",
+          "eventSignature": "AccessRevoked(address,address)"
+        }
+      },
+      "config": {
+        "storageApi": "https://storage.medguardian.health",
+        "healthApiEndpoint": "https://api.medguardian.health/v1/process",
+        "aiEndpoint": "https://api.openai.com/v1",
+        "accessControlContract": "0x76aAbBC9125F4642F8A510f4615112DC9F58f07B",
+        "reportRegistryContract": "0xA52986d362889aeF7075DD68325859c1D8a581Ac",
+        "consumerAddress": "0xA52986d362889aeF7075DD68325859c1D8a581Ac",
+        "tenderlyRpcUrl": "https://virtual.mainnet.rpc.tenderly.co/v1/WORKSPACE/VTN",
+        "tenderlyExplorerBase": "https://dashboard.tenderly.co/tx/ethereum-testnet-sepolia",
+        "allowHttpFallback": true,
+        "confidentialSummaryHeaderName": "X-CRE-Service-Key",
+        "owner": "0x95141F6bBC50022d8fadC957D5bc8534cFBAc7de"
+      }
+    }
+  ]
+}

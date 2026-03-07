@@ -1,0 +1,654 @@
+## Execution Tracker (Updated: February 24, 2026)
+
+### Phase 0 Status: Completed
+
+- [x] Backend build blockers fixed
+  - duplicate `mergedConfig` removed
+  - `SecureVitalsVault` implemented and wired
+  - `Map` iteration bugs fixed in simulator/orchestrator
+- [x] Frontend TypeScript blockers fixed
+  - patient selection prop typing corrected
+  - workflow stage typing corrected
+  - `bigint`/`number` mismatch corrected
+- [x] Contracts compile blockers fixed
+  - local `contracts/tsconfig.json` added
+  - Hardhat config aligned and compile now passes
+- [x] CRE workflows build blockers fixed
+  - TS entrypoint/root mismatch resolved
+  - active `src/index.ts` moved to SDK-compatible baseline
+  - `build` and `build:workflow` script split for local reliability
+- [x] Validation sweep completed
+  - `backend npm run build` PASS
+  - `frontend npm run build` PASS
+  - `contracts npm run compile` PASS
+  - `cre-workflows npm run build` PASS
+
+---
+
+## Next Execution Batch (Phase 1A)
+
+### Goal
+Enforce one source of truth and eliminate API/event drift that can break the demo story.
+
+### Tasks
+
+- [x] Frontend: disable local synthetic simulation when websocket backend is connected
+  - target files:
+    - `frontend/src/components/dashboard/SimulationEngine.tsx`
+    - `frontend/src/app/page.tsx`
+    - `frontend/src/hooks/useWebSocket.ts`
+- [x] Frontend/API: align `frontend/src/lib/api.ts` request/response types with backend routes
+  - verify against:
+    - `backend/src/routes/agent.ts`
+    - `backend/src/routes/simulation.ts`
+    - `backend/src/routes/doctor.ts`
+- [x] WebSocket: standardize event names and remove dead listeners
+  - backend source:
+    - `backend/src/services/websocket/index.ts`
+  - frontend consumer:
+    - `frontend/src/hooks/useWebSocket.ts`
+- [x] Add minimal regression smoke tests
+  - contracts: request -> receipt store path
+  - backend: vault deterministic output for seeded input
+  - workflow: TypeScript build + basic handler invocation
+
+### Phase 1A Exit Criteria
+
+- [x] UI does not self-simulate while backend is healthy
+- [x] API client typings match actual backend payload shapes
+- [x] No unused/dead websocket event contracts in active flow
+- [x] At least 1 smoke test in each of: contracts, backend, cre-workflows
+
+---
+
+## Next Execution Batch (Phase 1B)
+
+### Goal
+Create a functional CRE attestation summary interface and wire workflow dispatch to consume it.
+
+### Tasks
+
+- [x] Backend: add `/api/cre/summary` route
+  - target files:
+    - `backend/src/routes/cre.ts`
+    - `backend/src/index.ts`
+- [x] Backend: generate deterministic attestation fields from vault data
+  - `patientIdHash`, `commitId`, `reportHash`, `severity`, `encryptedCid`, `generatedAt`
+- [x] CRE workflow: hydrate report-dispatch payloads via backend summary lookup when partial payloads are provided
+  - target file:
+    - `cre-workflows/src/index.ts`
+- [x] CRE types: allow `patientId/commitId` dispatch inputs for summary-driven dispatch
+  - target file:
+    - `cre-workflows/src/types/health.ts`
+
+### Phase 1B Exit Criteria
+
+- [x] `GET /api/cre/summary` returns workflow-consumable summary data
+- [x] `onReportDispatch` can resolve missing fields through backend summary fetch
+- [x] `backend` build/test pass
+- [x] `cre-workflows` build/test pass
+
+---
+
+## Next Execution Batch (Phase 1C)
+
+### Goal
+Wire one deterministic golden-path flow end-to-end:
+`request -> summary -> writeReport -> UI receipt`.
+
+### Tasks
+
+- [x] Backend: implement deterministic CRE golden-path endpoints
+  - `/api/cre/seed`
+  - `/api/cre/summary`
+  - `/api/cre/dispatch`
+  - `/api/cre/receipts`
+- [x] Backend: add receipt store + websocket broadcast (`cre:receipt`)
+- [x] CRE workflows: hydrate dispatch payloads from summary lookup for partial inputs
+- [x] Frontend: add receipt model/store wiring and audit-tab receipt component
+- [x] Backend scripts: add deterministic demo runner (`npm run demo:golden-path`)
+
+### Phase 1C Exit Criteria
+
+- [x] Deterministic seed + summary outputs are stable for fixed input
+- [x] Dispatch path produces `receiptHash` and `txHash` (`onchain` when configured, deterministic simulation fallback otherwise)
+- [x] WebSocket init + live events carry receipts for UI consumption
+- [x] Frontend production build passes with receipt rendering enabled
+- [x] Demo script completes `request -> summary -> dispatch -> receipts` successfully
+
+---
+
+## Next Execution Batch (Phase 2A)
+
+### Goal
+Turn simulation output into deterministic diagnostic timelines that visibly shift by phase.
+
+### Tasks
+
+- [x] Backend simulator: replace random/noisy progression with deterministic simulation clock + phase profiles
+  - baseline -> perturbation -> onset -> escalation -> recovery loop per patient
+- [x] Backend simulator: tie phase modifiers directly to emitted vitals
+  - heart rate, blood pressure, glucose, oxygen saturation, temperature
+- [x] Backend simulator: replace random symptom injection with timeline + threshold-driven symptom emission
+- [x] Backend simulator: make proactive agent triggers deterministic (phase/cadence driven)
+- [x] Backend tests: add timeline determinism coverage
+  - phase window progression checks
+  - identical tick/timestamp output consistency checks
+  - escalation load > baseline check for same time-of-day
+
+### Phase 2A Exit Criteria
+
+- [x] Repeated runs produce the same timeline phase progression for each patient
+- [x] Vitals show clinically directional shifts between baseline and escalation windows
+- [x] Symptom stream reflects phase transitions, not random injection
+- [x] `backend` build/test/lint pass with new simulator logic
+
+---
+
+## Next Execution Batch (Phase 2B)
+
+### Goal
+Expose timeline phase/day as first-class runtime data across API, websocket, and UI.
+
+### Tasks
+
+- [x] Backend simulator: emit timeline snapshots with vitals + dedicated `patient:timeline` websocket event
+- [x] Backend API: include timeline snapshots in simulation endpoints
+  - `/api/simulation/status`
+  - `/api/simulation/patients/:patientId/vitals`
+  - `/api/simulation/patients/:patientId/state`
+  - `/api/simulation/patients/:patientId/timeline`
+- [x] WebSocket init payload: include per-patient timeline snapshots
+- [x] Frontend store/types: add `patientTimelines` map + update actions
+- [x] Frontend websocket client: ingest timeline snapshots from init/vitals/state/timeline events
+- [x] Frontend UI: show phase/day badges in patient roster and selected-patient workspace header
+
+### Phase 2B Exit Criteria
+
+- [x] Timeline phase/day visible in core patient views
+- [x] Timeline metadata available via both REST and websocket payloads
+- [x] `backend` build/test/lint pass
+- [x] `frontend` build/lint pass
+
+---
+
+## Next Execution Batch (Phase 2C)
+
+### Goal
+Expose derived trend evidence so phase shifts are explained, not just observed.
+
+### Tasks
+
+- [x] Backend API: add derived-feature endpoint from vault history
+  - `/api/simulation/patients/:patientId/features?windowHours=24`
+  - outputs: baseline/recent sample counts, metric drift, change-points, anomaly bursts
+- [x] Frontend API client: add typed `getPatientFeatures` integration
+- [x] Clinical workspace: render derived-features evidence card alongside vitals snapshot
+  - drift metrics (HR, BP, O2, glucose)
+  - change-point summary
+  - sample coverage indicator
+
+### Phase 2C Exit Criteria
+
+- [x] Derived feature evidence available via REST for each patient
+- [x] Workspace shows explainable trend artifacts, not only raw metric values
+- [x] `backend` build/test/lint pass
+- [x] `frontend` build/lint pass
+
+---
+
+## Next Execution Batch (Phase 2D)
+
+### Goal
+Carry derived feature evidence through CRE summary/dispatch so receipts and UI present the same trust artifacts.
+
+### Tasks
+
+- [x] Backend: unify derived feature computation in shared simulation service module
+- [x] Backend CRE summary: include `derivedFeatures` + `featureWindowHours` in `/api/cre/summary`
+- [x] Backend CRE dispatch/receipt: persist derived features in canonical receipt payload and receipt store
+- [x] Frontend receipts UI: render receipt-level change points and drift values
+- [x] CRE workflow: hydrate and forward derived feature metadata when summary-driven dispatch is used
+
+### Phase 2D Exit Criteria
+
+- [x] `/api/cre/summary` returns the same drift/change-point structure used by simulation features endpoint
+- [x] `/api/cre/dispatch` receipt payload includes derived evidence fields
+- [x] Audit receipt panel displays derived evidence from receipt payloads
+- [x] `backend` build/test/lint pass
+- [x] `frontend` build/lint pass
+- [x] `cre-workflows` build/test pass
+- [x] Golden-path script completes with derived evidence logging
+
+---
+
+## Next Execution Batch (Phase 3A)
+
+### Goal
+Harden cryptography + operations so the demo cannot fail due placeholder hashing or fragile startup steps.
+
+### Tasks
+
+- [x] Backend: migrate CRE summary/dispatch hashing to EVM-compatible `keccak256` with strict ABI-encoded canonical payloads
+- [x] Backend: migrate vault commitment/tx hashing to deterministic `keccak256` encoding
+- [x] Backend: add deterministic state reset endpoint (`POST /api/cre/reset`) for reliable reruns
+- [x] CRE workflows: replace placeholder hash/encoding logic in legacy workflow modules with shared EVM encoding helpers
+- [x] CRE workflows: add encoding hardening smoke tests for `hashPatientId` and ABI payload encoding
+- [x] Contracts: fix `deploy:local` script so it performs an actual deployment when invoked via `hardhat run`
+- [x] Ops: add executable phase-3 runbook scripts (`scripts/phase3-runbook.sh`, `scripts/phase3-smoke.sh`)
+- [x] Docs: add one-page operational runbook (`PHASE3-OPERATIONS-RUNBOOK.md`)
+- [x] Golden path v2: run request from contract event trigger (`RequestCreated`) as primary (not backend-dispatch initiated)
+
+### Phase 3A Exit Criteria
+
+- [x] No placeholder hashing/encoding remains in active backend CRE flow
+- [x] Workflow encoding helpers are validated by tests
+- [x] Demo stack can be reset and rerun with deterministic steps from a single runbook
+- [x] Cross-package phase-3 smoke checks pass from one script
+- [x] Contract-event-triggered workflow loop is primary path
+
+---
+
+## Next Execution Batch (Phase 3B)
+
+### Goal
+Raise contract confidence by covering access lifecycle, issuer gating, and request-event integrity with deterministic unit tests.
+
+### Tasks
+
+- [x] Contracts: add unit tests for `grantAccess`, `extendAccess`, `revokeAccess`, `checkAccess`, and `isQueryAllowed` bitmask behavior
+- [x] Contracts: add issuer authorization tests for `onReport` and `logAccess` positive/negative paths
+- [x] Contracts: add `createRequest`/`RequestCreated` validation tests for golden-path request integrity
+- [x] Validation: ensure `contracts` compile + full test suite + smoke tests pass
+
+### Phase 3B Exit Criteria
+
+- [x] Contract access lifecycle has deterministic test coverage
+- [x] Unauthorized workflow ingress is explicitly tested and rejected
+- [x] Request creation event contract is covered by unit tests
+- [x] `contracts npm run test` and `contracts npm run smoke` pass
+
+---
+
+## Next Execution Batch (Phase 3C)
+
+### Goal
+Begin shared type extraction to reduce backend/frontend drift on core simulation identities and timeline primitives.
+
+### Tasks
+
+- [x] Shared: add canonical simulation identity/timeline declarations in `shared/types/simulation.d.ts`
+- [x] Backend: consume shared `PatientId`, `DoctorId`, `PatientState`, and timeline types from `shared/types`
+- [x] Frontend: consume the same shared identity/timeline types via type aliases in `frontend/src/types/simulation.ts`
+- [x] Validation: pass backend build/tests and frontend type-check/build/lint after extraction
+- [ ] Expand shared extraction to access/report/receipt contracts (`AccessPermission`, `DerivedFeatureSet`, `DataUseReceipt`)
+- [ ] Add package-level import alias (`@medguardian/shared/*`) to replace deep relative shared imports
+
+### Phase 3C Exit Criteria (in progress)
+
+- [x] Core patient/doctor/timeline types are shared between backend and frontend
+- [ ] Access and receipt schemas are also shared
+- [ ] Shared imports use stable aliases across packages
+
+---
+
+Absolutely — and the good news is: your audit already tells us **exactly** why the project *looks* close but isn’t yet “judge-proof.” The winning move now is **not** adding features. It’s building an unstoppable **trust spine** end-to-end, then making the UI tell that story in 30 seconds.
+
+Below is the refactor plan I’d run if we were optimizing purely to **win the hackathon**.
+
+I’m basing this directly on your current build reality (backend/contracts/CRE blockers, missing vault, type drift, etc.) from the audit report. 
+
+---
+
+## The winning thesis (what judges should understand instantly)
+
+**MedGuardian = “Consent-as-code + Timeline diagnostics + Verifiable audit receipts.”**
+A clinician can only run diagnosis workflows *if* the patient’s policy allows it; every run creates a **Data Use Receipt** anchored onchain; outputs are offchain but provably untampered via hashes.
+
+This aligns perfectly with CRE’s strengths: **verifiable workflows** (consensus computing) across HTTP + EVM reads/writes. ([Chainlink Documentation][1])
+
+---
+
+## North Star demo flow (the one path we make bulletproof)
+
+This is the “single golden path” you harden until it cannot fail:
+
+1. **Patient** chooses: *“Allow Dr. X to run Fatigue Intake Pack for last 30 days (derived-only)”*
+2. **Policy hash** is anchored onchain (no PHI onchain)
+3. **Doctor** clicks “Request Intake Pack”
+4. A **smart contract emits** `RequestCreated`
+5. CRE Workflow triggers on that event (EVM Log Trigger) ([Chainlink Documentation][2])
+6. CRE Workflow:
+
+   * reads policy meta onchain
+   * pulls **derived features** from Vault via HTTP capability ([Chainlink Documentation][3])
+   * generates `outputHash` + `receiptHash`
+   * writes back to chain via the secure onchain write path (KeystoneForwarder → consumer contract) ([Chainlink Documentation][4])
+7. **Frontend** shows:
+
+   * “What data was used” (receipt)
+   * “What was produced” (summary)
+   * “Proof anchor” (receipt hash + output hash)
+
+This alone is a winning demo if it’s clean and undeniable.
+
+---
+
+## Non-negotiable architectural rule for this refactor
+
+### One source of truth
+
+Right now the UI can “look alive” even when the backend is broken because the frontend can self-simulate. That’s a demo credibility trap noted in the audit.
+
+**Refactor rule:**
+
+* Backend owns simulation + vault truth
+* Frontend only renders backend state (with an explicit “offline fallback” banner if you keep any local sim)
+
+---
+
+## Phase 0 — Stop the bleeding: make everything build + run
+
+Your audit calls out multiple **P0 compile blockers** across btracts, and CRE workflows.
+This phase is purely about making the repo “green” again.
+
+### Backend (must compile and start)
+
+Fixes (from audit):
+
+* Remove duplicate `mergedConfig` declaration in `LLMService.ts` (currently blocks `npm run dev/build`).
+* Implement the missing module `SecureVitalsVault` referPortal.ts`
+
+  * `PatientSimulator.ts`
+    (right now it’s missing entirely, blocking runtime and the privacy story).
+* Fix `Map` misuse (`Object.keys(this.patients)` etc.) so simulation progresses rel
+
+**Deliverable:** `backend` starts, emits simulation events, exposes vault APIs.
+
+### Frontend (must type-check + build)
+
+Fixes (from audit):
+
+* `page.tsx` prop mismatch for `onSelectPatie:contentReference[oaicite:13]{index=13}ne.tsx` stage type mismatch (`"completed"` not in union)
+* `bigint` to `number` mismatch
+  Throd build.
+
+**Deliverable:** `frontend` builds and renders live backend data.
+
+### Contracts (must compile/test)
+
+Fixes (from audit):
+
+* TS5109 mismatch: `moduleResolution` must match `NodeNext` usage in Hardhat config; add `contracts/tsconfig.json` and align Hardhat config.
+* Deploy scriptdeploy` but it’s not installed (audit). Either install it or convert deploy scripts to plain Hardhat.
+
+**Deliverable:** `contracts` compile and a basic test runs.
+
+### CRE workflows (must build consistently)
+
+Fixes (from audit):
+
+* `main.ts` src` → TS6059 build failure.
+* Two entrypoint styles (`src/index.ts` and `main.ts`) + workflow.yaml points to one while code depends on the o
+
+**Refactor decision:** pick exactly one entrypoint (recommend `src/index.ts`), move logic under `/src`, update `workflow.yaml` accordingly.
+
+**Deliverable:** `cre-workflows` builds and simulates.
+
+---
+
+## Phase 1 — Build the Trust Spine v1 (policy → workflow → receipt → onchain)
+
+This is where you pec we designed: **consent as code + audit receipts + hashes onchain**.
+
+### 1) Contracts: minimal onchain surface (no PHI)
+
+You already have `HealthAccessControl.sol` and receiver patterns in place (audit).
+Now shape them into two clean primitives:
+
+#### A) `ConsentRegistry`
+
+Stores only:
+
+* `policyHash`
+* `expiresAt`
+* `active`
+  keyed by `(patient, grantee)`.
+
+#### B) `MedPrivReceiver` (consumer contract)
+
+Receives CRE reports via the secure write path (forwarder → `onReport`). ([Chainlink Documentation][5])
+
+* `requestId → receiptHash`
+* `requestId → outputHash`
+* `requestId → triageLevel`
+  Emits events for the frontend.
+
+**Definition of Done**
+
+* You can `createRequest()` → see `RequestCreated` event
+* You can call receiver with a mock report in tests → state updates
+
+---
+
+### 2) Backend: implement the missing “Vault” for real
+
+Your audit says the “privacy vault module is referenced but missing,” which blocks the core privacy claims.
+
+Implement `SecureVitalsVault` as the patient vault service with **two tiers**:
+
+* **Raw store**: raw vitals/events (never returned to CRE in deployed mode)
+* **Derived features store**: rolling baselines, trend slopes, anomalies
+
+Add endpoints (MVP):
+
+* `GET /v1/policies/:patient/:grantee` → returns full policy JSON (offchain)
+* `GET /v1/features?patient&from&to&categories=` → derived bundle + `inputBundleHash`
+  ..` → structured symptom events only
+* `POST /v1/outputs` → stores output, returns `outputRef` + `outputRefHash`
+
+Also fix the current CRE gap: audit flags workflow calling `/api/cre/summary` but backend has no `/api/cre/*`. Either:
+
+* implement `/api/cre/summary` as an alias to the new vault endpoints, **or**
+* update the workflow to call the new endpoints.
+
+**Definition of Done**
+
+* Vault returns consistent derived feature bundles for any patient/time window
+* Policy JSON’s `policyHash` matches what’s anchored onchain
+
+---
+
+### 3) CRE workflows: refactor into 1 unstoppable “IntakePackV1”
+
+Start with ONE workflow and make it flawless.
+
+#### Trigger: EVM Log Trigger
+
+Workflow triggers on `RequestCreated`. ([Chainlink Documentation][2])
+
+#### Steps
+
+1. Onchain read: fetch `policyHa
+2. HTTP fetch (decentralized): GET derived features + symptoms from vault ([Chainlink Documentation][3])
+3. Compute:
+
+   * deterministic triage score + anomalies (keep it robust)
+   * optional LLM narrative summary (only from derived features)
+4. POST output (optional) + compute `outputHash`
+5. Build `receiptHash`
+6. Write report to chain through the secure write flow (forwarder → consumer contract) ([Chainlink Documentation][5])
+
+#### Key constraint to respect
+
+**Confidential HTTP is simulation-only right now (not deployable).** ([Chainlink Documentation][6])
+So for deployed workflows:
+
+* fetch **derived-only** bundles
+* avoid raw, free-text, location, etc.
+
+But for your “wow moment” in a local sim, you can show confidential HTTP semantics and say “this becomes deployable as CRE privacy features mature,” without lying.
+
+**Definition of Done**
+
+* From a clean chain state, one click creates a request → CRE sim runs → receiver stores receiptHash/outputHash → UI updates
+
+---
+
+### 4) Frontend: make the trust visible
+
+Your UI polish is already strong (audit), but the critical issue is wiring correctness and turning it into a judge narrative.
+
+Implement 3 screens/components that sell the win:
+
+1. **Consent Builder**
+
+   * pick doctor
+   * pick purpose/workflow
+   * pick data categories and “derived only”
+   * “Anchor Policy” → calls contract + stores full JSON in vault
+
+2. **Doctor Request Panel**
+
+   * choose patient pseudonym
+   * click “Request Intake Pack”
+   * show request status: pending → completed (from onchain + ws)
+
+3. **Data Use Receipt Viewer**
+
+   * human-readable receipt fields:
+
+     * purpose
+     * categories used
+     * time window
+     * whether raw access occurred
+   * show onchain anchors: `receiptHash`, `outputHash`
+
+This is what makes the project “new system” rather than “health dashboard with blockchain stickers.”
+
+---
+
+## Phase 2 — Turn your simulation into a *diagnostic* timeline, not random telemetry
+
+Ri vitals/events. Winning requires **storyful time-series**:
+
+* “something changes”
+* “symptoms emerge”
+* “signals correlate”
+* “doctor sees insight + proof”
+
+### Simulation upgrade (minimal but high impact)
+
+For each virtual patient, define:
+
+* baseline week
+* perturbation period (sleep deprivation, overtraining, infection-like, med side effect)
+* symptom onset
+* recovery or escalation
+
+Then make derived features reflect:
+
+* baseline drift
+* change points
+* anomaly bursts
+
+**Definition of Done**
+
+* A judge can visually see “the shift” before the model explains it
+* The intake pack points to the same shift, with evidence
+
+---
+
+## Phase 3 — Demo-hardening (remove surprises)
+
+Your audit highlights “demo credibility risks” (UI masking backend issues, placeholder cryptography, workflow build drift, etc.).
+This phase eliminates anything that can embarrass you live.
+
+### Hardening checklist
+
+* **Disable** frontend local sim when backend websocket is connected (single truth mode).
+* Standardize websocket event naming (pick one convention; remove dead listeners).
+* Replace placeholder hashing/encoding with real `keccak256` and strict ABI encoding so onchain hashes are meaningful.
+* Add 3 “smoke tests” only:
+
+  1. contracts: request → store receipt
+  2. backend: vault endpoints return deterministic data for a seed
+  3. workflow: build + simulate completes
+
+### Operational runbook (1 page)
+
+You want a single command sequence:
+
+* start chain / deploy contracts
+* start backend
+* start frontend
+* run one CRE simulation trigger
+
+Amand that clears local DB / resets simulation seed.
+
+---
+
+## “Kill list” (what to cut to win)
+
+To keep the refactor tight:
+
+* Anything not mounted / not shown in demo (audit notesr components).
+* Any workflow besides **IntakePackV1** until i claim of fully deployed confidential compute (because confidential HTTP is simulation-only today) ([Chainlink Documentation][6])
+  lation we demonstrate confidential API interactions; deployed mode uses derived-only minimization + onchain receipts.”*
+
+This keeps you honest *and* impressive.
+
+---
+
+## The judge-facing script (90 seconds, no fluff)
+
+1. “Patient grants **diagnosis-only**, **derived-only** access for 30 days. Policy anchored onchain.”
+2. “Doctor requests intake pack; smart contract emits request.”
+3. “CRE workflow executes with consensus verification across nodes.” ([Chainlink Documentation][1])
+4. “Workflow writes back via secure onchain write mechanism into our consumer contract.” ([Chainlink Documentation][5])earch3
+5. “Here’s the Data Use Receipt: exactly what was used, why, and proof hashes.”
+6. “Patient can revoke at any time; future workflow runs fail with an auditable denial receipt.”
+
+That is a clean, differentiated story.
+
+---
+
+## “Definition of Done” scoreboard (what ‘done’ means in this refactor)
+
+### Green build
+
+* frontend builds
+* backend starts
+* contracts compile + one test
+* workflows build + simulate ([Chainlink Documentation][7])
+
+### Golden path
+
+* policy anchored
+* request emitted
+* workflow runs
+* receipt stored onchain
+* UI shows receipt + output + proof
+
+### Honesty + strength
+
+* no PHI onchain
+* deployed mode avoids raw data exposure
+* simulation demonstrates privacy tech trajectory without overclaiming ([Chainlink Documentation][6])
+
+---
+
+## If you follow only one rule
+
+**Everything that doesn’t strengthen the golden path is a distraction.**
+Your audit shows you already have “a lot” — the win is turning it into **a single unstoppable loop** with verifiable trust.
+
+If you want, next message I can turn this plan into a **repo-level refactor checklist** (package by package, file-by-file “edit list”) that maps the v1 components onto what you already have in `medguardian/` so you can execute mechanically without guesswork.
+
+[1]: https://docs.chain.link/cre/concepts/consensus-computing?utm_source=chatgpt.com "Consensus Computing in CRE"
+[2]: https://docs.chain.link/cre/guides/workflow/using-triggers/evm-log-trigger-go?utm_source=chatgpt.com "EVM Log Trigger | Chainlink Documentation"
+[3]: https://docs.chain.link/cre/capabilities/http?utm_source=chatgpt.com "The HTTP Capability"
+[4]: https://docs.chain.link/cre/guides/workflow/using-evm-client/onchain-write/overview-go?utm_source=chatgpt.com "Onchain Write | Chainlink Documentation"
+[5]: https://docs.chain.link/cre/guides/workflow/using-evm-client/onchain-write/building-consumer-contracts?utm_source=chatgpt.com "Building Consumer Contracts"
+[6]: https://docs.chain.link/cre/guides/workflow/using-confidential-http-client?utm_source=chatgpt.com "Confidential API Interactions (Experimental)"
+[7]: https://docs.chain.link/cre/guides/operations/simulating-workflows?utm_source=chatgpt.com "Simulating Workflows"

@@ -1,0 +1,338 @@
+{
+  "version": 1,
+  "updatedAt": "2026-03-01T04:31:13Z",
+  "workflows": [
+    {
+      "id": "medical_agent_status",
+      "displayName": "Medical Agent Status",
+      "description": "Return health status across core loops, memory, and anchoring backlog.",
+      "riskLevel": "low",
+      "inputParams": [],
+      "steps": [
+        {
+          "tool": "run_workflow",
+          "args": {
+            "workflow": "awakener_status"
+          },
+          "description": "Get inner clock and runtime status"
+        },
+        {
+          "tool": "memory_search",
+          "args": {
+            "query": "type:anchor status:pending",
+            "limit": "10"
+          },
+          "description": "Estimate unanchored audit backlog"
+        }
+      ]
+    },
+    {
+      "id": "patient_email_intake",
+      "displayName": "Patient Email Intake",
+      "description": "Read unread patient messages, classify urgency, update case memory, and emit audit trace.",
+      "riskLevel": "medium",
+      "inputParams": [
+        {
+          "name": "mailbox",
+          "description": "Mailbox or folder label",
+          "required": false
+        },
+        {
+          "name": "limit",
+          "description": "Maximum unread emails to process",
+          "required": false
+        }
+      ],
+      "steps": [
+        {
+          "tool": "email_read",
+          "args": {
+            "mailbox": "{{input.mailbox}}",
+            "limit": "{{input.limit}}"
+          },
+          "description": "Fetch unread inbound email messages"
+        },
+        {
+          "tool": "case_create_or_update",
+          "args": {
+            "source": "email_intake",
+            "payload": "{{steps.0.output}}"
+          },
+          "description": "Create/update case records from inbound content"
+        },
+        {
+          "tool": "memory_store",
+          "args": {
+            "category": "case_intake",
+            "fact": "{{steps.1.output}}"
+          },
+          "description": "Persist intake summary and provenance"
+        }
+      ]
+    },
+    {
+      "id": "consent_capture_and_anchor",
+      "displayName": "Consent Capture and Anchor",
+      "description": "Validate consent, record locally, and anchor proof hash on-chain.",
+      "riskLevel": "high",
+      "inputParams": [
+        {
+          "name": "case_id",
+          "description": "Pseudonymous case ID",
+          "required": true
+        },
+        {
+          "name": "subject_id_hash",
+          "description": "Hashed subject identifier",
+          "required": true
+        },
+        {
+          "name": "scope_hash",
+          "description": "Hashed consent scope descriptor",
+          "required": true
+        },
+        {
+          "name": "expiry_utc",
+          "description": "Consent expiry timestamp",
+          "required": true
+        },
+        {
+          "name": "evidence_hash",
+          "description": "Hash of signed or captured consent artifact",
+          "required": true
+        }
+      ],
+      "steps": [
+        {
+          "tool": "memory_store",
+          "args": {
+            "category": "consent_local_record",
+            "fact": "case={{input.case_id}} subject={{input.subject_id_hash}} scope={{input.scope_hash}} expiry={{input.expiry_utc}} evidence={{input.evidence_hash}}"
+          },
+          "description": "Store local consent record for replay"
+        },
+        {
+          "tool": "consent_record_onchain",
+          "args": {
+            "subject_id_hash": "{{input.subject_id_hash}}",
+            "scope_hash": "{{input.scope_hash}}",
+            "expiry_utc": "{{input.expiry_utc}}",
+            "evidence_hash": "{{input.evidence_hash}}"
+          },
+          "description": "Write consent proof to blockchain"
+        },
+        {
+          "tool": "memory_store",
+          "args": {
+            "category": "consent_chain_receipt",
+            "fact": "case={{input.case_id}} chain_result={{steps.1.output}}"
+          },
+          "description": "Persist chain tx reference and status"
+        }
+      ]
+    },
+    {
+      "id": "care_followup_draft",
+      "displayName": "Care Follow-up Draft",
+      "description": "Generate a policy-compliant follow-up draft based on recent case memory.",
+      "riskLevel": "medium",
+      "inputParams": [
+        {
+          "name": "case_id",
+          "description": "Pseudonymous case ID",
+          "required": true
+        },
+        {
+          "name": "tone",
+          "description": "Message tone guidance",
+          "required": false
+        }
+      ],
+      "steps": [
+        {
+          "tool": "memory_search",
+          "args": {
+            "query": "case:{{input.case_id}}",
+            "limit": "20"
+          },
+          "description": "Load recent case timeline context"
+        },
+        {
+          "tool": "memory_store",
+          "args": {
+            "category": "followup_draft",
+            "fact": "case={{input.case_id}} tone={{input.tone}} draft_context={{steps.0.output}}"
+          },
+          "description": "Persist draft artifact metadata"
+        }
+      ]
+    },
+    {
+      "id": "care_followup_send",
+      "displayName": "Care Follow-up Send",
+      "description": "Send approved follow-up email and log delivery evidence.",
+      "riskLevel": "high",
+      "inputParams": [
+        {
+          "name": "case_id",
+          "description": "Pseudonymous case ID",
+          "required": true
+        },
+        {
+          "name": "to",
+          "description": "Recipient email",
+          "required": true
+        },
+        {
+          "name": "subject",
+          "description": "Email subject line",
+          "required": true
+        },
+        {
+          "name": "body",
+          "description": "Approved message body",
+          "required": true
+        },
+        {
+          "name": "approval_event_id",
+          "description": "Approval audit event ID",
+          "required": true
+        }
+      ],
+      "steps": [
+        {
+          "tool": "email_send",
+          "args": {
+            "to": "{{input.to}}",
+            "subject": "{{input.subject}}",
+            "body": "{{input.body}}"
+          },
+          "description": "Deliver the approved follow-up email"
+        },
+        {
+          "tool": "memory_store",
+          "args": {
+            "category": "followup_delivery",
+            "fact": "case={{input.case_id}} approval_event={{input.approval_event_id}} delivery={{steps.0.output}}"
+          },
+          "description": "Persist delivery receipt metadata"
+        }
+      ]
+    },
+    {
+      "id": "critical_risk_escalation",
+      "displayName": "Critical Risk Escalation",
+      "description": "Escalate urgent patient risk indicators to human operator immediately.",
+      "riskLevel": "high",
+      "inputParams": [
+        {
+          "name": "case_id",
+          "description": "Pseudonymous case ID",
+          "required": true
+        },
+        {
+          "name": "risk_reason",
+          "description": "Risk rationale text",
+          "required": true
+        }
+      ],
+      "steps": [
+        {
+          "tool": "memory_search",
+          "args": {
+            "query": "case:{{input.case_id}}",
+            "limit": "10"
+          },
+          "description": "Collect immediate context for escalation summary"
+        },
+        {
+          "tool": "memory_store",
+          "args": {
+            "category": "critical_escalation",
+            "fact": "case={{input.case_id}} reason={{input.risk_reason}} context={{steps.0.output}}"
+          },
+          "description": "Persist escalation record"
+        }
+      ]
+    },
+    {
+      "id": "audit_anchor_batch",
+      "displayName": "Audit Anchor Batch",
+      "description": "Anchor unanchored event batch on-chain and persist proof metadata.",
+      "riskLevel": "high",
+      "inputParams": [
+        {
+          "name": "batch_id",
+          "description": "Anchor batch identifier",
+          "required": true
+        },
+        {
+          "name": "merkle_root",
+          "description": "Merkle root over event hashes",
+          "required": true
+        },
+        {
+          "name": "event_count",
+          "description": "Number of events included",
+          "required": true
+        },
+        {
+          "name": "uri_hash",
+          "description": "Hash of off-chain artifact URI",
+          "required": true
+        }
+      ],
+      "steps": [
+        {
+          "tool": "anchor_audit_batch",
+          "args": {
+            "batch_id": "{{input.batch_id}}",
+            "merkle_root": "{{input.merkle_root}}",
+            "event_count": "{{input.event_count}}",
+            "uri_hash": "{{input.uri_hash}}"
+          },
+          "description": "Submit anchor transaction on-chain"
+        },
+        {
+          "tool": "memory_store",
+          "args": {
+            "category": "audit_anchor_receipt",
+            "fact": "batch={{input.batch_id}} receipt={{steps.0.output}}"
+          },
+          "description": "Store anchor receipt for replay"
+        }
+      ]
+    },
+    {
+      "id": "weekly_reflection_report",
+      "displayName": "Weekly Reflection Report",
+      "description": "Summarize case outcomes, bottlenecks, and policy compliance for operator review.",
+      "riskLevel": "low",
+      "inputParams": [
+        {
+          "name": "days",
+          "description": "Lookback period in days",
+          "required": false
+        }
+      ],
+      "steps": [
+        {
+          "tool": "memory_search",
+          "args": {
+            "query": "type:audit OR type:workflow",
+            "limit": "200"
+          },
+          "description": "Retrieve recent operational events"
+        },
+        {
+          "tool": "memory_store",
+          "args": {
+            "category": "weekly_reflection",
+            "fact": "lookback_days={{input.days}} summary_source={{steps.0.output}}"
+          },
+          "description": "Persist reflection artifact metadata"
+        }
+      ]
+    }
+  ]
+}

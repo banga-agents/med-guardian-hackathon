@@ -1,0 +1,504 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600;700&display=swap');
+
+:root {
+  /* ── Premium Light Mode Palette ─────────────────────────────────────────── */
+  --mg-surface-base:    #FFFFFF;        /* Sterile White */
+  --mg-surface-muted:   #F8FAFC;        /* Soft Alabaster */
+  --mg-surface-panel:   #FFFFFF;
+  --mg-surface-card:    #F8FAFC;
+  --mg-surface-overlay: #F1F5F9;
+
+  --mg-brand-primary:   #0E767D;        /* Teal Slate */
+  --mg-brand-accent:    #0A5F65;        /* Teal Slate Dark */
+  --mg-brand-contrast:  #B91C1C;        /* Muted Ruby — for alerts/CTA only */
+  --mg-chainlink:       #4338CA;        /* Indigo — Chainlink brand */
+  --mg-cre:             #6D28D9;        /* Violet — CRE brand */
+
+  --mg-border-subtle:   rgba(226, 232, 240, 0.85);
+  --mg-border-strong:   rgba(14, 118, 125, 0.35);
+
+  --mg-text-primary:    #1A202C;        /* Ink Navy */
+  --mg-text-secondary:  #4A5568;
+  --mg-text-muted:      #718096;
+  --mg-text-disabled:   #A0AEC0;
+
+  --mg-shadow-panel:    0 4px 24px rgba(26, 32, 44, 0.07), 0 1px 4px rgba(26, 32, 44, 0.05);
+  --mg-shadow-card:     0 2px 12px rgba(26, 32, 44, 0.05);
+  --mg-shadow-lift:     0 8px 32px rgba(26, 32, 44, 0.10), 0 2px 8px rgba(26, 32, 44, 0.06);
+
+  --mg-focus-ring:      0 0 0 3px rgba(14, 118, 125, 0.22);
+  --mg-font-display:    "Inter", "Space Grotesk", "Segoe UI", sans-serif;
+}
+
+@layer base {
+  * {
+    border-color: var(--mg-border-subtle);
+  }
+  html {
+    @apply antialiased;
+  }
+  body {
+    font-family: var(--mg-font-display);
+    color: var(--mg-text-primary);
+    background-color: var(--mg-surface-muted);
+    background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 55%, #F1F5F9 100%);
+    min-height: 100vh;
+  }
+  :focus-visible {
+    outline: none;
+    box-shadow: var(--mg-focus-ring);
+  }
+}
+
+@layer components {
+  /* ── Core Panel ────────────────────────────────────────────────────────── */
+  .panel {
+    @apply rounded-2xl border p-4;
+    border-color: var(--mg-border-subtle);
+    background: var(--mg-surface-panel);
+    box-shadow: var(--mg-shadow-panel);
+  }
+  .panel-lift {
+    transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
+  }
+  .panel-lift:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--mg-shadow-lift);
+  }
+  .panel-hover {
+    @apply panel transition-all duration-300;
+  }
+  .panel-hover:hover {
+    border-color: var(--mg-border-strong);
+    box-shadow: var(--mg-shadow-lift);
+    transform: translateY(-1px);
+  }
+
+  /* ── Typography ────────────────────────────────────────────────────────── */
+  .command-title {
+    font-family: var(--mg-font-display);
+    letter-spacing: -0.015em;
+  }
+  .command-kicker {
+    @apply text-[10px] font-semibold uppercase tracking-[0.16em];
+    color: var(--mg-text-muted);
+  }
+
+  /* ── Module Switch ─────────────────────────────────────────────────────── */
+  .module-switch {
+    @apply inline-flex items-center gap-1 rounded-xl border p-1;
+    border-color: var(--mg-border-subtle);
+    background: var(--mg-surface-panel);
+    box-shadow: 0 1px 4px rgba(26, 32, 44, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  }
+  .module-pill {
+    @apply relative px-3 py-1.5 rounded-lg text-[10px] font-semibold uppercase tracking-[0.12em] transition-all;
+    color: var(--mg-text-muted);
+  }
+  .module-pill:hover {
+    background: var(--mg-surface-muted);
+    color: var(--mg-text-secondary);
+  }
+  .module-pill-active-arc {
+    color: var(--mg-brand-primary);
+    background: rgba(14, 118, 125, 0.09);
+    box-shadow: 0 0 0 1px rgba(14, 118, 125, 0.22) inset;
+  }
+  .module-pill-active-cost {
+    color: var(--mg-chainlink);
+    background: rgba(67, 56, 202, 0.09);
+    box-shadow: 0 0 0 1px rgba(67, 56, 202, 0.22) inset;
+  }
+
+  /* ── Console Tabs ──────────────────────────────────────────────────────── */
+  .console-tab {
+    @apply px-3 py-1.5 rounded-lg text-[10px] font-semibold uppercase tracking-[0.1em] border transition-all;
+    border-color: var(--mg-border-subtle);
+    color: var(--mg-text-muted);
+    background: var(--mg-surface-panel);
+  }
+  .console-tab:hover {
+    border-color: rgba(14, 118, 125, 0.25);
+    color: var(--mg-text-secondary);
+  }
+  .console-tab-active {
+    color: var(--mg-brand-primary);
+    border-color: rgba(14, 118, 125, 0.30);
+    background: rgba(14, 118, 125, 0.07);
+    box-shadow: 0 0 0 1px rgba(14, 118, 125, 0.18) inset;
+  }
+
+  /* ── Surface Utilities ─────────────────────────────────────────────────── */
+  .surface-subtle {
+    border: 1px solid var(--mg-border-subtle);
+    background: var(--mg-surface-muted);
+  }
+  .metric-tile {
+    @apply rounded-xl p-3;
+    border: 1px solid var(--mg-border-subtle);
+    background: var(--mg-surface-panel);
+    box-shadow: var(--mg-shadow-card);
+  }
+  .module-banner {
+    @apply px-3 py-2 rounded-xl border text-[11px] flex items-center justify-between;
+    border-color: var(--mg-border-subtle);
+    background: var(--mg-surface-panel);
+    box-shadow: var(--mg-shadow-card);
+  }
+  .glass {
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--mg-border-subtle);
+    box-shadow: var(--mg-shadow-panel);
+  }
+
+  /* ── Status Dots ───────────────────────────────────────────────────────── */
+  .status-dot {
+    @apply w-2 h-2 rounded-full;
+  }
+  .status-dot-online {
+    @apply status-dot;
+    background: #10B981;
+    box-shadow: 0 0 6px rgba(16, 185, 129, 0.5);
+  }
+  .status-dot-offline {
+    @apply status-dot;
+    background: var(--mg-text-disabled);
+  }
+  .status-dot-busy {
+    @apply status-dot;
+    background: #F59E0B;
+    box-shadow: 0 0 6px rgba(245, 158, 11, 0.4);
+  }
+  .status-dot-alert {
+    @apply status-dot;
+    background: var(--mg-brand-contrast);  /* Muted Ruby */
+    box-shadow: 0 0 8px rgba(185, 28, 28, 0.4);
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  /* ── Glows — subtle in light mode ─────────────────────────────────────── */
+  .glow-medical {
+    box-shadow: 0 0 14px rgba(14, 118, 125, 0.22), 0 0 28px rgba(14, 118, 125, 0.10);
+  }
+  .glow-healthy {
+    box-shadow: 0 0 12px rgba(16, 185, 129, 0.20);
+  }
+  .glow-warning {
+    box-shadow: 0 0 12px rgba(245, 158, 11, 0.22);
+  }
+  .glow-critical {
+    box-shadow: 0 0 12px rgba(185, 28, 28, 0.22);
+  }
+  .glow-cre {
+    box-shadow: 0 0 14px rgba(109, 40, 217, 0.22), 0 0 28px rgba(109, 40, 217, 0.10);
+  }
+  .glow-chainlink {
+    box-shadow: 0 0 14px rgba(67, 56, 202, 0.22), 0 0 28px rgba(67, 56, 202, 0.10);
+  }
+
+  /* ── Text Gradient — Teal Slate to Ink Navy ────────────────────────────── */
+  .text-gradient {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, #0E767D 0%, #0A5F65 50%, #1A202C 100%);
+  }
+  .text-gradient-gold {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, #B45309 0%, #D97706 50%, #B45309 100%);
+  }
+
+  /* ── Scrollbar ─────────────────────────────────────────────────────────── */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(14, 118, 125, 0.18) transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: rgba(14, 118, 125, 0.18);
+    border-radius: 999px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: rgba(14, 118, 125, 0.35);
+  }
+
+  /* ── Live dot — Muted Ruby ─────────────────────────────────────────────── */
+  .live-dot {
+    @apply w-2 h-2 rounded-full;
+    background: var(--mg-brand-contrast);  /* Muted Ruby */
+    animation: live-pulse 1.5s ease-in-out infinite;
+  }
+
+  /* ── medical-light wrapper — comprehensive light mode ─────────────────── */
+  .medical-light {
+    color: var(--mg-text-primary);
+    background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 60%, #F1F5F9 100%);
+  }
+
+  /* ── text-white/* → Ink Navy scale ──────────────────────────────────────
+     Components authored for dark mode use text-white/N classes throughout.
+     Map them to readable ink-navy equivalents on light backgrounds.          */
+  .medical-light [class~='text-white'] {
+    color: #1A202C !important;
+  }
+  .medical-light [class*='text-white/9'],
+  .medical-light [class*='text-white/8'] {
+    color: #2D3748 !important;
+  }
+  .medical-light [class*='text-white/7'] {
+    color: #374151 !important;
+  }
+  .medical-light [class*='text-white/6'],
+  .medical-light [class*='text-white/5'] {
+    color: #4A5568 !important;
+  }
+  .medical-light [class*='text-white/4'] {
+    color: #718096 !important;
+  }
+  .medical-light [class*='text-white/3'] {
+    color: #94A3B8 !important;
+  }
+  .medical-light [class*='text-white/2'],
+  .medical-light [class*='text-white/1'] {
+    color: #CBD5E0 !important;
+  }
+
+  /* ── border-white/* → Soft Alabaster borders ─────────────────────────── */
+  .medical-light [class*='border-white/'] {
+    border-color: rgba(226, 232, 240, 0.85) !important;
+  }
+
+  /* ── bg-white/very-low-opacity (dark mode glass) → Alabaster surface ─── */
+  .medical-light [class*='bg-white/[0.0'] {
+    background-color: #F8FAFC !important;
+  }
+  .medical-light [class*='bg-white/[0.1'] {
+    background-color: rgba(241, 245, 249, 0.95) !important;
+  }
+  .medical-light [class*='bg-white/2'],
+  .medical-light [class*='bg-white/3'],
+  .medical-light [class*='bg-white/5'] {
+    background-color: #F8FAFC !important;
+  }
+  .medical-light [class*='bg-white/8'],
+  .medical-light [class*='bg-white/10'] {
+    background-color: #F1F5F9 !important;
+  }
+
+  /* ── Input / textarea placeholders ───────────────────────────────────── */
+  .medical-light input::placeholder,
+  .medical-light textarea::placeholder {
+    color: #A0AEC0 !important;
+  }
+  .medical-light input,
+  .medical-light textarea,
+  .medical-light select {
+    color: #1A202C;
+    background-color: #FFFFFF;
+  }
+
+  /* ── Fix low-contrast 200/300/400-range accent colours (dark mode palette) ─
+     These Tailwind shades are designed for dark backgrounds.
+     Override to darker shades that read on Sterile White.                    */
+  .medical-light [class*='text-rose-2'],
+  .medical-light [class*='text-rose-3'],
+  .medical-light [class*='text-rose-4'] { color: #be123c !important; }
+
+  .medical-light [class*='text-sky-2'],
+  .medical-light [class*='text-sky-3'],
+  .medical-light [class*='text-sky-4']  { color: #0284c7 !important; }
+
+  .medical-light [class*='text-cyan-2'],
+  .medical-light [class*='text-cyan-3'],
+  .medical-light [class*='text-cyan-4'] { color: #0e7490 !important; }
+
+  .medical-light [class*='text-purple-2'],
+  .medical-light [class*='text-purple-3'],
+  .medical-light [class*='text-purple-4'],
+  .medical-light [class*='text-violet-2'],
+  .medical-light [class*='text-violet-3'],
+  .medical-light [class*='text-violet-4'] { color: #6d28d9 !important; }
+
+  .medical-light [class*='text-emerald-2'],
+  .medical-light [class*='text-emerald-3'],
+  .medical-light [class*='text-emerald-4'] { color: #047857 !important; }
+
+  .medical-light [class*='text-green-2'],
+  .medical-light [class*='text-green-3'],
+  .medical-light [class*='text-green-4']   { color: #15803d !important; }
+
+  .medical-light [class*='text-blue-2'],
+  .medical-light [class*='text-blue-3'],
+  .medical-light [class*='text-blue-4']    { color: #1d4ed8 !important; }
+
+  .medical-light [class*='text-indigo-2'],
+  .medical-light [class*='text-indigo-3'],
+  .medical-light [class*='text-indigo-4']  { color: #4338ca !important; }
+
+  .medical-light [class*='text-amber-2'],
+  .medical-light [class*='text-amber-3'],
+  .medical-light [class*='text-amber-4']   { color: #b45309 !important; }
+
+  .medical-light [class*='text-orange-2'],
+  .medical-light [class*='text-orange-3'],
+  .medical-light [class*='text-orange-4']  { color: #c2410c !important; }
+
+  .medical-light [class*='text-pink-2'],
+  .medical-light [class*='text-pink-3'],
+  .medical-light [class*='text-pink-4']    { color: #9d174d !important; }
+
+  /* ── Specific hex colors often used in dark UI as near-white tints ─────── */
+  /* [#7DD3FC] = sky-300: near invisible on white → map to sky-700 */
+  /* These are handled by the attribute selectors above for named classes;
+     for hex-in-class like text-[#7DD3FC] we add individual overrides. */
+
+  /* ── opacity-* dim hints on dark panels → keep visible on light ───────── */
+  .medical-light .opacity-50 { opacity: 0.65; }
+  .medical-light .opacity-30 { opacity: 0.55; }
+
+  /* ── bg overrides for dark bg-dark-* / bg-slate-800+ ─────────────────── */
+  .medical-light [class*='bg-dark'] {
+    background-color: #FFFFFF !important;
+  }
+  .medical-light [class='bg-slate-800'],
+  .medical-light [class='bg-slate-900'],
+  .medical-light [class='bg-gray-800'],
+  .medical-light [class='bg-gray-900'] {
+    background-color: #F8FAFC !important;
+  }
+
+  /* ── Severity token overrides — these come from tokens.ts (dark palette) */
+  /* The surface colors (0.08 opacity) are fine on light, but text needs fix */
+  .medical-light .text-text-primary { color: #1A202C !important; }
+
+  /* ── Border gradient — subtle teal-to-indigo ───────────────────────────── */
+  .border-gradient {
+    position: relative;
+  }
+  .border-gradient::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(135deg, rgba(14, 118, 125, 0.4), rgba(67, 56, 202, 0.3));
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    -webkit-mask-composite: xor;
+    pointer-events: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel-hover,
+  .panel-lift,
+  .module-pill,
+  .console-tab {
+    transition: none !important;
+  }
+  .animate-pulse-glow,
+  .animate-float,
+  .animate-spin-slow,
+  .animate-pulse-ring,
+  .animate-shimmer,
+  .animate-fade-in,
+  .animate-scale-in,
+  .live-dot {
+    animation: none !important;
+  }
+}
+
+@layer utilities {
+  .animate-pulse-glow {
+    animation: pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+  .animate-spin-slow {
+    animation: spin 8s linear infinite;
+  }
+  .animate-pulse-ring {
+    animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+  }
+  .animate-shimmer {
+    animation: shimmer 2s linear infinite;
+    background-size: 200% 100%;
+  }
+  .animate-fade-in {
+    animation: fade-in 0.5s ease-out;
+  }
+  .animate-scale-in {
+    animation: scale-in 0.3s ease-out;
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 1; filter: drop-shadow(0 0 6px currentColor); }
+  50%       { opacity: 0.75; filter: drop-shadow(0 0 3px currentColor); }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-8px); }
+}
+@keyframes pulse-ring {
+  0%   { transform: scale(0.8); opacity: 0.8; }
+  100% { transform: scale(2);   opacity: 0; }
+}
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200%  0; }
+}
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes scale-in {
+  from { transform: scale(0.9); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+@keyframes live-pulse {
+  0%, 100% { opacity: 1;   box-shadow: 0 0 0 0   rgba(185, 28, 28, 0.6); }
+  50%       { opacity: 0.8; box-shadow: 0 0 0 5px rgba(185, 28, 28, 0); }
+}
+
+/* ── Canvas & particle helpers ─────────────────────────────────────────────── */
+.canvas-container {
+  @apply relative w-full h-full overflow-hidden;
+}
+.canvas-container canvas {
+  @apply w-full h-full;
+  outline: none;
+}
+.panel-scroll {
+  @apply overflow-y-auto scrollbar-thin;
+}
+.data-particle {
+  @apply absolute w-1 h-1 rounded-full;
+  will-change: transform;
+}
+.encrypted-flow {
+  @apply data-particle;
+  background: #0E767D;
+  box-shadow: 0 0 5px rgba(14, 118, 125, 0.6);
+}
+.plaintext-flow {
+  @apply data-particle;
+  background: #F59E0B;
+  box-shadow: 0 0 5px rgba(245, 158, 11, 0.5);
+}
+.processing-flow {
+  @apply data-particle;
+  background: #6D28D9;
+  box-shadow: 0 0 5px rgba(109, 40, 217, 0.5);
+}

@@ -1,0 +1,52 @@
+{
+  "name": "@medguardian/backend",
+  "version": "1.0.0",
+  "description": "Backend services for MedGuardian simulation",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "lint": "eslint src --ext .ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "smoke": "vitest run src/routes/cre-derived-evidence.test.ts src/services/privacy/SecureVitalsVault.test.ts",
+    "agent:check": "tsx scripts/check-llm-providers.ts",
+    "demo:golden-path": "tsx scripts/run-golden-path.ts",
+    "demo:network-flow": "tsx scripts/run-network-flow.ts",
+    "demo:prime-dashboard": "tsx scripts/prime-dashboard.ts"
+  },
+  "dependencies": {
+    "@types/pg": "^8.18.0",
+    "cors": "^2.8.5",
+    "date-fns": "^3.3.0",
+    "dotenv": "^16.4.0",
+    "ethers": "^6.10.0",
+    "express": "^4.18.2",
+    "helmet": "^7.1.0",
+    "node-cron": "^3.0.3",
+    "pg": "^8.20.0",
+    "socket.io": "^4.7.4",
+    "uuid": "^9.0.1",
+    "ws": "^8.16.0",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.11.0",
+    "@types/node-cron": "^3.0.11",
+    "@types/uuid": "^9.0.8",
+    "@types/ws": "^8.5.10",
+    "@typescript-eslint/eslint-plugin": "^6.19.0",
+    "@typescript-eslint/parser": "^6.19.0",
+    "eslint": "^8.56.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3",
+    "vitest": "^1.2.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

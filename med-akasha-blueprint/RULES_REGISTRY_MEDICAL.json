@@ -1,0 +1,182 @@
+{
+  "version": 1,
+  "updatedAt": "2026-03-01T04:31:13Z",
+  "defaults": {
+    "onValidationError": "fail_closed",
+    "maxDirectivesPerScope": 24
+  },
+  "rules": [
+    {
+      "id": "kernel.medical-safety-boundary",
+      "version": 1,
+      "enabled": true,
+      "priority": 1200,
+      "scope": ["global"],
+      "description": "Block autonomous diagnosis/prescription and require clinician escalation when needed.",
+      "directives": [
+        {
+          "id": "forbid-final-diagnosis",
+          "mode": "forbid",
+          "topic": "medical_safety",
+          "instruction": "Do not provide final diagnosis or claim definitive clinical conclusions."
+        },
+        {
+          "id": "forbid-prescription",
+          "mode": "forbid",
+          "topic": "medical_safety",
+          "instruction": "Do not recommend or issue prescriptions, dosage changes, or medication directives autonomously."
+        },
+        {
+          "id": "require-escalation-for-critical-signals",
+          "mode": "require",
+          "topic": "medical_safety",
+          "instruction": "If severe or emergency indicators are detected, trigger critical risk escalation workflow and notify operator immediately."
+        }
+      ]
+    },
+    {
+      "id": "privacy.phi-minimization",
+      "version": 1,
+      "enabled": true,
+      "priority": 1150,
+      "scope": ["global"],
+      "description": "Minimize PHI exposure and enforce redaction on model and external channels.",
+      "directives": [
+        {
+          "id": "require-pseudonymous-context",
+          "mode": "require",
+          "topic": "privacy",
+          "instruction": "Use pseudonymous case references in LLM context; avoid direct patient identifiers unless strictly required."
+        },
+        {
+          "id": "forbid-raw-phi-in-external-responses",
+          "mode": "forbid",
+          "topic": "privacy",
+          "instruction": "Do not expose raw PHI in outbound channels or public endpoints."
+        },
+        {
+          "id": "forbid-onchain-phi",
+          "mode": "forbid",
+          "topic": "privacy",
+          "instruction": "Never write PHI or reversible identifiers on-chain; only hashes/opaque IDs are permitted."
+        }
+      ]
+    },
+    {
+      "id": "consent.require-active-scope",
+      "version": 1,
+      "enabled": true,
+      "priority": 1100,
+      "scope": ["chat", "email", "workflow"],
+      "description": "Require active consent before case communication or external processing.",
+      "directives": [
+        {
+          "id": "require-consent-check",
+          "mode": "require",
+          "topic": "consent",
+          "instruction": "Before outbound communication or sensitive processing, verify active consent and scope for the case."
+        },
+        {
+          "id": "block-without-consent",
+          "mode": "forbid",
+          "topic": "consent",
+          "instruction": "If consent is missing, revoked, expired, or out of scope, block the action and request operator intervention."
+        }
+      ]
+    },
+    {
+      "id": "execution.high-risk-human-approval",
+      "version": 1,
+      "enabled": true,
+      "priority": 1000,
+      "scope": ["workflow", "email", "blockchain"],
+      "description": "Enforce approval before high-risk side effects.",
+      "directives": [
+        {
+          "id": "require-approval-for-send",
+          "mode": "require",
+          "topic": "approval",
+          "instruction": "Outbound patient messages classified as medium/high risk require explicit operator approval event before send."
+        },
+        {
+          "id": "require-approval-for-onchain-write",
+          "mode": "require",
+          "topic": "approval",
+          "instruction": "Blockchain consent writes and audit anchoring actions require approval unless policy marks them as scheduled trusted jobs."
+        }
+      ]
+    },
+    {
+      "id": "audit.append-only-traceability",
+      "version": 1,
+      "enabled": true,
+      "priority": 980,
+      "scope": ["global"],
+      "description": "Guarantee deterministic traceability and tamper evidence.",
+      "directives": [
+        {
+          "id": "require-pre-and-post-events",
+          "mode": "require",
+          "topic": "audit",
+          "instruction": "Every external-effect action must emit pre-action and post-action audit events with hashes."
+        },
+        {
+          "id": "require-hash-chain",
+          "mode": "require",
+          "topic": "audit",
+          "instruction": "Each audit event must include prev_hash and event_hash to preserve append-only hash chain continuity."
+        },
+        {
+          "id": "require-anchor-batching",
+          "mode": "require",
+          "topic": "audit",
+          "instruction": "Unanchored events must be included in periodic anchor batches written on-chain."
+        }
+      ]
+    },
+    {
+      "id": "explainability.decision-evidence",
+      "version": 1,
+      "enabled": true,
+      "priority": 900,
+      "scope": ["chat", "email", "workflow"],
+      "description": "Require concise, evidence-backed explanations for decisions.",
+      "directives": [
+        {
+          "id": "require-rule-citations",
+          "mode": "require",
+          "topic": "explainability",
+          "instruction": "When an action is blocked or requires approval, return the triggering rule IDs and a concise rationale."
+        },
+        {
+          "id": "require-uncertainty-disclosure",
+          "mode": "require",
+          "topic": "explainability",
+          "instruction": "If confidence is limited or evidence is incomplete, explicitly state uncertainty and suggest the next safe step."
+        }
+      ]
+    },
+    {
+      "id": "model-routing.compliance-determinism",
+      "version": 1,
+      "enabled": true,
+      "priority": 850,
+      "scope": ["chat", "workflow"],
+      "description": "Use deterministic model settings for compliance-critical checks.",
+      "directives": [
+        {
+          "id": "require-low-temperature-compliance",
+          "mode": "require",
+          "topic": "model_selection",
+          "instruction": "Compliance and policy checks must run on a deterministic profile with low temperature and strict output schema."
+        },
+        {
+          "id": "require-routing-telemetry",
+          "mode": "require",
+          "topic": "model_selection",
+          "instruction": "Log selected model/provider and fallback attempts in audit metadata for each request."
+        }
+      ]
+    }
+  ]
+}
