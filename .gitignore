@@ -7,6 +7,8 @@ dist/
 **/dist/
 .next/
 **/.next/
+*.tsbuildinfo
+frontend/tsconfig.tsbuildinfo
 coverage/
 **/coverage/
 out/
@@ -16,6 +18,13 @@ build/
 foundry-out/
 contracts/foundry-out/
 contracts/deployments/
+contracts/artifacts/
+contracts/cache/
+contracts/typechain-types/
+cre-workflows/main.js
+cre-workflows/main.js.map
+cre-workflows/main.d.ts
+cre-workflows/main.d.ts.map
 
 # Runtime and logs
 .runlogs/
