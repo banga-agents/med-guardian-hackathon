@@ -1,56 +1,235 @@
 # MedGuardian
 
-Privacy-first diagnosis acceleration platform with a real-time simulation, doctor validation workflows, professional network operations, and Chainlink CRE integration.
+MedGuardian is a privacy-first clinical decision-support and care-coordination demo built for the Chainlink Convergence hackathon.
+
+It turns messy symptom updates into structured clinical context, keeps a human clinician in control, routes overflow work through a professional network, and produces auditable CRE receipts plus onchain proof for the parts that matter.
+
+## Why This Project Exists
+
+Healthcare AI usually fails in one of three places:
+
+- patients do not trust where their data goes
+- clinicians do not trust black-box recommendations
+- teams cannot prove who accessed what, when, why, and at what cost
+
+MedGuardian is designed to make that flow inspectable instead of opaque.
+
+## What Judges See In The Demo
+
+MedGuardian is intentionally built as a single-screen command center:
+
+- left rail: live patient roster
+- center workspace: `Arc` and `Cost`
+- right rail: `Clinical Console`
+- background simulation: continuous patient activity and workflow events
+
+The demo shows four proof surfaces in one interface:
+
+1. patient monitoring and risk drift
+2. doctor validation and controlled access to evidence
+3. collaborative care execution through a professional network
+4. Chainlink CRE receipts, audit trails, and cost telemetry
+
+## Interface Tour
+
+### Header
+
+The header is the control bar for the whole demo:
+
+- `Arc` and `Cost` module switch
+- live connection and simulation status
+- start, pause, and reset controls
+- `Explain Mode` for privacy annotations and Tenderly-style callouts
+
+On smaller screens, the app can collapse into `Patient Mode` for a patient-first mobile shell.
+
+### Left Rail: Patient Roster
+
+The left rail is the patient selector.
+
+It lets the operator switch between seeded profiles and keeps the rest of the dashboard synchronized around the selected patient.
+
+### Center Workspace: Arc
+
+`Arc` is the main operating surface. It has five views.
+
+#### `Journey`
+
+The patient journey is the clinical workspace.
+
+This is where MedGuardian surfaces the active patient state: timeline movement, symptoms, status, and the context that feeds the rest of the workflow.
+
+#### `Doctor`
+
+The doctor view is the clinician command surface.
+
+It focuses on:
+
+- triage and prioritization
+- access-request and approval flow
+- redacted versus raw vitals access
+- clinician-to-agent consultation
+- validation and next-step dispatch
+
+This is the clearest place to show that AI organizes evidence, but the clinician remains the decision-maker.
+
+#### `Agent`
+
+The agent view is the MedGuardian intelligence layer.
+
+It is split into:
+
+- `Intake`
+- `Timeline`
+- `Care Plan`
+- `Doctor Brief`
+- `Audit & Proof`
+
+This panel is where the full human-in-the-loop flow becomes visible:
+
+- ingest a patient message
+- add a symptom event
+- generate a structured doctor brief
+- inspect privacy status and runtime health
+- anchor an audit event
+- verify the resulting proof trail
+
+#### `CRE`
+
+The CRE view explains the Chainlink path.
+
+It combines:
+
+- `CRE Pipeline`
+- workflow/runtime status
+
+This is where the demo shows how private summary retrieval, report dispatch, and receipt generation move through Chainlink CRE and then into auditable records.
+
+#### `Network`
+
+The network view is the collaborative care marketplace.
+
+It supports:
+
+- case intake
+- operator selection
+- queue management
+- activity and payout visibility
+
+The built-in `Judge Demo Flow` walks through:
+
+1. `Intake`
+2. `Claim`
+3. `Submit`
+4. `Approve + Pay`
+
+This is the easiest place to demonstrate how overflow care work can be distributed while still staying accountable.
+
+### Center Workspace: Cost
+
+`Cost` is the verifiable economics view.
+
+It turns CRE receipts into operating telemetry:
+
+- total cost
+- tx cost
+- LLM cost
+- average cost per receipt
+- recent receipts with transport mode, write mode, and tx links
+
+This is important because the project is not only about privacy and evidence. It also shows what the workflow costs to run.
+
+### Right Rail: Clinical Console
+
+The right rail stays visible beside most Arc views and provides supporting evidence while the main story happens in the center workspace.
+
+It has three tabs:
+
+- `Safety Signals`
+- `Event Trace`
+- `CRE Audit`
+
+Those expand into:
+
+- `Alerts`, `AI Recs`, `Stats`
+- realtime logs
+- `Receipts`, `Workflows`, `Access`
+
+This rail is useful during a demo because it gives a second layer of proof without requiring navigation away from the main workflow.
+
+## Recommended 4-Minute Demo Flow
+
+This is the most effective walkthrough for judges.
+
+1. Open the dashboard and show the one-screen layout.
+2. Start in `Arc -> Journey` and explain that patient activity is being simulated in real time.
+3. Move to `Arc -> Doctor` and show clinician review, access control, and validation.
+4. Move to `Arc -> Agent` and demonstrate intake, doctor brief generation, and audit proof.
+5. Move to `Arc -> CRE` and explain the Chainlink workflow path and receipt generation.
+6. Move to `Arc -> Network` and run the `Intake -> Claim -> Submit -> Approve + Pay` flow.
+7. Finish in `Cost` and show receipt-backed economics telemetry.
+
+That sequence tells a complete story:
+
+- patient signal comes in
+- clinician validates it
+- CRE makes the workflow auditable
+- the network executes overflow work
+- the system exposes both proof and cost
 
 ## What MedGuardian Does
 
-MedGuardian helps move patients faster from symptom reporting to validated next steps.
+MedGuardian helps teams move from symptom reporting to validated next steps faster, while keeping privacy and evidence in the loop.
 
-- Patient side: symptom logging, guided check-ins, longitudinal risk signals.
-- Doctor side: structured timeline, research-backed briefing, validated care-plan dispatch.
-- Network side: role-based professional missions (doctor, nurse, lab tech, caregiver, nutritionist) with claim/submit/approve/pay flow.
-- Audit side: traceability of critical workflow actions, plus CRE receipt telemetry.
+- patient side: symptom logging, guided check-ins, longitudinal risk signals
+- clinician side: structured timeline, research-backed briefing, validation workflow
+- network side: role-based professional missions with claim, submit, approve, and pay
+- audit side: traceable workflow actions, CRE receipts, and cost telemetry
 
-## Core Modules
-
-- `Arc`: Clinical intelligence and operations workspace.
-- `Cost`: Receipt-backed telemetry for workflow economics and latency.
-- `MedGuardian Agent` (inside Arc console): intake, trend signals, doctor brief, audit anchor/verify.
-
-## Architecture Overview
+## Architecture At A Glance
 
 End-to-end flow:
 
-1. Patient data and symptom updates enter backend simulation and MedGuardian Agent intake APIs.
+1. Patient updates enter the backend simulation and MedGuardian intake APIs.
 2. Agent workflows structure events, derive risk signals, and prepare doctor-facing brief data.
-3. CRE dispatch path requests summary data, signs report payloads, and writes via EVM client (onchain or simulated).
-4. Audit events are hash-linked and can be anchored/verified with explicit `anchorMode` provenance.
-5. Frontend subscribes to backend state/events and surfaces proof metadata (`summaryTransportMode`, `writeMode`, `privacyProof`) in Agent, Audit, and Cost views.
+3. CRE dispatch requests summary data, builds report payloads, and writes via EVM client in `onchain` or `simulated` mode.
+4. Audit events are hash-linked and can be anchored or verified with explicit provenance.
+5. The frontend subscribes to backend state and surfaces proof metadata such as `summaryTransportMode`, `writeMode`, and `privacyProof`.
 
 Primary stack:
 
-- Frontend: Next.js + React + Zustand
-- Backend: Node.js/TypeScript + Express + Socket.IO
-- Workflows: Chainlink CRE TypeScript SDK + CRE CLI simulation
-- Contracts: Solidity (HealthAccessControl + consumer receiver pattern)
+- frontend: Next.js + React + Zustand
+- backend: Node.js + TypeScript + Express + Socket.IO
+- workflows: Chainlink CRE TypeScript SDK + CRE CLI simulation
+- contracts: Solidity with `HealthAccessControl` and consumer receiver pattern
 
-## Audited Status (March 5, 2026)
+## Repo Layout
 
-Validated with local runbooks and smoke tests:
+- `frontend/`: dashboard, patient shell, cost panel, and proof surfaces
+- `backend/`: simulation engine, agent routes, doctor workflows, audit routes, network flows, and CRE bridge
+- `cre-workflows/`: Chainlink CRE workflow runtime code
+- `cre-cli-proof/`: minimal proof workflow used for reliable CRE simulation evidence
+- `contracts/`: smart contracts and deployment scripts
+- `scripts/`: runbooks, audits, smoke tests, and demo helpers
+- `reports/`: release audits, handoffs, and submission support docs
 
-- `./scripts/hackathon-runbook.sh check` ✅
-- `./scripts/phase3-smoke.sh` ✅
-- `./scripts/demo-validated-insight.sh` ✅
-- `./scripts/demo-medguardian-agent.sh` ✅
-- Backend build/test ✅
-- Frontend production build ✅
-- CRE workflows build/test ✅
+## Audited Status
+
+Validated in the current hackathon release flow:
+
+- `./scripts/hackathon-runbook.sh check` passed
+- `./scripts/phase3-smoke.sh` passed
+- `./scripts/demo-validated-insight.sh` passed
+- `./scripts/demo-medguardian-agent.sh` passed
+- backend build, lint, and tests passed
+- frontend production build passed
+- CRE workflows build and tests passed
 
 Audit artifact: [reports/public-release-audit-2026-03-05.md](reports/public-release-audit-2026-03-05.md)
 
 ## Quick Start
 
-### 1) Install
+### 1. Install dependencies
 
 ```bash
 cd backend && npm install
@@ -60,14 +239,14 @@ cd ../contracts && npm install
 cd ..
 ```
 
-### 2) Configure env
+### 2. Configure environment
 
 ```bash
 cp backend/.env.example backend/.env
 cp frontend/.env.example frontend/.env.local
 ```
 
-For real LLM behavior (recommended for demo), set a real provider key in `backend/.env`:
+For real LLM behavior in the demo, configure a real provider key in `backend/.env`:
 
 - `GEMINI_API_KEY=<your_real_key>`
 - `AGENT_MODE=akasha`
@@ -80,15 +259,15 @@ npm run agent:check
 curl -sS http://localhost:4000/api/agents/providers | jq '.data.availability'
 ```
 
-Optional durable memory/audit persistence with TimescaleDB:
+Optional durable memory and audit persistence with TimescaleDB:
 
 - `TIMESCALE_DATABASE_URL=postgres://...`
 - `MEMORY_ENCRYPTION_KEY=<strong_key>`
 - `TIMESCALE_SSL=true|false`
 
-When configured, MedGuardian writes encrypted symptom/memory/audit/anchor records to Timescale-backed tables and hydrates state on boot.
+When configured, MedGuardian writes encrypted symptom, memory, audit, and anchor records to Timescale-backed tables and hydrates state on boot.
 
-Local quick start (Docker):
+Local quick start for Timescale:
 
 ```bash
 docker run --name medguardian-timescale \
@@ -98,7 +277,7 @@ docker run --name medguardian-timescale \
   -d timescale/timescaledb:latest-pg16
 ```
 
-### 3) Start app
+### 3. Start the app
 
 ```bash
 ./scripts/hackathon-runbook.sh up
@@ -106,132 +285,146 @@ docker run --name medguardian-timescale \
 
 Open:
 
-- Frontend: `http://localhost:3000`
-- Backend health: `http://localhost:4000/health`
-- Network status: `http://localhost:4000/api/network/status`
+- frontend: `http://localhost:3000`
+- backend health: `http://localhost:4000/health`
+- network status: `http://localhost:4000/api/network/status`
 
-### 4) Run readiness checks
+### 4. Run readiness checks
 
 ```bash
 ./scripts/hackathon-runbook.sh check
 ```
 
-## Demo Seeders
+## Demo Helpers
 
-- Full validated-insight loop:
+Seed the demo before recording:
+
+- full validated-insight loop
 
 ```bash
 ./scripts/demo-validated-insight.sh
 ```
 
-- MedGuardian Agent loop:
+- MedGuardian Agent loop
 
 ```bash
 ./scripts/demo-medguardian-agent.sh
 ```
 
-## On-Chain vs Simulated Mode
-
-CRE request/dispatch supports both modes:
-
-- `onchain`: requires valid `ETHEREUM_RPC_URL`, `PRIVATE_KEY`, and contract address envs.
-- `simulated`: automatic fallback when those envs are missing/placeholder.
-
-In API responses:
-
-- `POST /api/cre/request` returns `data.mode` (`onchain` or `simulated`).
-- `POST /api/cre/dispatch` receipt includes `writeMode` (`onchain` or `simulated`).
-
-## Confidential HTTP Privacy Path
-
-Active CRE dispatch now supports confidential summary retrieval with explicit transport proof:
-
-- Primary path: `confidential_http` using Vault DON secret references.
-- Fallback path: `http_fallback` only when confidential fetch fails and fallback is allowed.
-- Dispatch response and receipt now include:
-  - `summaryTransportMode`
-  - `privacyProof` (`secretRef`, `triggerId`, `workflowId`, `timestamp`)
-
-Required backend env for private summary route:
-
-- `CRE_PRIVATE_SUMMARY_KEY`
-- `CRE_MUTATION_API_KEY` (optional dedicated key for privileged CRE mutations; falls back to `CRE_PRIVATE_SUMMARY_KEY`)
-
-Private summary endpoint used by confidential workflow calls:
-
-- `GET /api/cre/private/summary` (requires `x-cre-service-key`)
-- `POST /api/cre/request` (requires `x-cre-service-key`)
-- `POST /api/cre/dispatch` (requires `x-cre-service-key`)
-
-## Chainlink Integration Map
-
-### CRE Workflow Runtime
-
-- Entrypoint and handlers: [cre-workflows/src/index.ts](cre-workflows/src/index.ts)
-- Legacy dispatch reference module: [cre-workflows/src/workflows/reportDispatch.ts](cre-workflows/src/workflows/reportDispatch.ts)
-- Workflow config schema: [cre-workflows/src/types/config.ts](cre-workflows/src/types/config.ts)
-- ABI encoding utilities: [cre-workflows/src/utils/evmEncoding.ts](cre-workflows/src/utils/evmEncoding.ts)
-
-### Smart Contracts
-
-- Access control + request/report/audit events: [contracts/contracts/HealthAccessControl.sol](contracts/contracts/HealthAccessControl.sol)
-- CRE consumer receiver template usage: [contracts/contracts/MedGuardianConsumer.sol](contracts/contracts/MedGuardianConsumer.sol)
-- Receiver interface: [contracts/contracts/IReceiver.sol](contracts/contracts/IReceiver.sol)
-- Deployment script: [contracts/deploy/00_deploy_health_access.ts](contracts/deploy/00_deploy_health_access.ts)
-
-### Backend Chainlink/CRE Bridge
-
-- CRE API + request/dispatch/receipt routes: [backend/src/routes/cre.ts](backend/src/routes/cre.ts)
-- Cost telemetry aggregation: [backend/src/routes/cost.ts](backend/src/routes/cost.ts)
-- RequestCreated log watcher: [backend/src/services/blockchain/RequestCreatedWatcher.ts](backend/src/services/blockchain/RequestCreatedWatcher.ts)
-- Receipt persistence: [backend/src/services/cre/ReceiptStore.ts](backend/src/services/cre/ReceiptStore.ts)
-- Privacy vault for redacted/raw reads: [backend/src/services/privacy/SecureVitalsVault.ts](backend/src/services/privacy/SecureVitalsVault.ts)
-
-### Frontend Surfaces
-
-- Main dashboard shell: [frontend/src/app/page.tsx](frontend/src/app/page.tsx)
-- Clinical console tabs: [frontend/src/components/dashboard/ClinicalConsoleTabs.tsx](frontend/src/components/dashboard/ClinicalConsoleTabs.tsx)
-- MedGuardian Agent panel: [frontend/src/components/dashboard/AkashaAgentPanel.tsx](frontend/src/components/dashboard/AkashaAgentPanel.tsx)
-- API client wiring: [frontend/src/lib/api.ts](frontend/src/lib/api.ts)
-
-## Public Repo Safety Checklist
-
-Before publishing:
-
-1. Ensure `.env` and `.env.local` are not committed.
-2. Run the safety + functionality audit:
-
-```bash
-./scripts/public-repo-audit.sh full
-```
-
-3. If any key was ever real in local `.env`, rotate/revoke it.
-4. Keep only placeholder secrets in `*.env.example` files.
-
-## Key APIs
-
-- Agent kernel status: `GET /api/agents/kernel/status`
-- MedGuardian chat: `POST /api/medguardian/chat` (legacy alias: `/api/patient/chat`)
-- MedGuardian symptoms: `POST /api/medguardian/symptoms` (legacy alias: `/api/patient/symptoms`)
-- MedGuardian timeline: `GET /api/medguardian/:id/timeline` (legacy alias: `/api/patient/:id/timeline`)
-- MedGuardian doctor brief: `POST /api/medguardian/doctor/brief` (legacy alias: `/api/doctor/brief`)
-- MedGuardian escalation: `POST /api/medguardian/alerts/escalate` (legacy alias: `/api/alerts/escalate`)
-- MedGuardian audit anchor: `POST /api/medguardian/audit/anchor` (legacy alias: `/api/audit/anchor`; public calls simulate, `x-cre-service-key` enables onchain anchoring)
-- MedGuardian audit verify: `GET /api/medguardian/audit/verify/:event_id` (legacy alias: `/api/audit/verify/:event_id`)
-- CRE request: `POST /api/cre/request` (service-to-service, requires `x-cre-service-key`)
-- CRE dispatch: `POST /api/cre/dispatch` (service-to-service, requires `x-cre-service-key`)
-- CRE private summary: `GET /api/cre/private/summary`
-- Cost overview: `GET /api/cost/overview`
-
-## Proof Runbook
-
-Deterministic end-to-end privacy proof (seed -> dispatch -> anchor -> verify):
+- deterministic privacy proof runbook
 
 ```bash
 ./scripts/proof-privacy-runbook.sh
 ```
 
-Then capture CRE CLI simulation evidence (after one-time login):
+## Privacy And Proof Model
+
+MedGuardian is designed to show a realistic split between private data handling and public proof.
+
+- raw patient data stays offchain
+- important workflow evidence is captured as receipts and audit entries
+- selected events can be anchored onchain
+- proof metadata is visible in the UI and API responses
+
+### Onchain vs simulated mode
+
+CRE request and dispatch support both modes:
+
+- `onchain`: requires valid `ETHEREUM_RPC_URL`, `PRIVATE_KEY`, and receiver contract envs
+- `simulated`: automatic fallback when those envs are missing or placeholder
+
+In API responses:
+
+- `POST /api/cre/request` returns `data.mode`
+- `POST /api/cre/dispatch` returns a receipt with `writeMode`
+- `POST /api/medguardian/audit/anchor` simulates for public callers and only enables onchain anchoring for privileged service-to-service calls
+
+### Confidential summary path
+
+Active CRE dispatch supports confidential summary retrieval with explicit transport proof:
+
+- primary path: `confidential_http` using Vault DON secret references
+- fallback path: `http_fallback` only when confidential fetch fails and fallback is allowed
+
+Dispatch responses and receipts include:
+
+- `summaryTransportMode`
+- `privacyProof` with `secretRef`, `triggerId`, `workflowId`, and `timestamp`
+
+Required backend env for privileged CRE operations:
+
+- `CRE_PRIVATE_SUMMARY_KEY`
+- `CRE_MUTATION_API_KEY`
+
+Privileged endpoints:
+
+- `GET /api/cre/private/summary`
+- `POST /api/cre/request`
+- `POST /api/cre/dispatch`
+
+All require `x-cre-service-key`.
+
+## Chainlink Integration Map
+
+### CRE workflow runtime
+
+- entrypoint and handlers: [cre-workflows/src/index.ts](cre-workflows/src/index.ts)
+- legacy dispatch reference: [cre-workflows/src/workflows/reportDispatch.ts](cre-workflows/src/workflows/reportDispatch.ts)
+- workflow config schema: [cre-workflows/src/types/config.ts](cre-workflows/src/types/config.ts)
+- EVM encoding utilities: [cre-workflows/src/utils/evmEncoding.ts](cre-workflows/src/utils/evmEncoding.ts)
+
+### Smart contracts
+
+- access control, request, report, and audit events: [contracts/contracts/HealthAccessControl.sol](contracts/contracts/HealthAccessControl.sol)
+- CRE consumer receiver template: [contracts/contracts/MedGuardianConsumer.sol](contracts/contracts/MedGuardianConsumer.sol)
+- receiver interface: [contracts/contracts/IReceiver.sol](contracts/contracts/IReceiver.sol)
+- deployment script: [contracts/deploy/00_deploy_health_access.ts](contracts/deploy/00_deploy_health_access.ts)
+
+### Backend Chainlink and CRE bridge
+
+- CRE API, request, dispatch, and receipt routes: [backend/src/routes/cre.ts](backend/src/routes/cre.ts)
+- cost telemetry aggregation: [backend/src/routes/cost.ts](backend/src/routes/cost.ts)
+- request log watcher: [backend/src/services/blockchain/RequestCreatedWatcher.ts](backend/src/services/blockchain/RequestCreatedWatcher.ts)
+- receipt persistence: [backend/src/services/cre/ReceiptStore.ts](backend/src/services/cre/ReceiptStore.ts)
+- privacy vault for redacted and raw reads: [backend/src/services/privacy/SecureVitalsVault.ts](backend/src/services/privacy/SecureVitalsVault.ts)
+
+### Frontend surfaces
+
+- main dashboard shell: [frontend/src/app/page.tsx](frontend/src/app/page.tsx)
+- clinical console tabs: [frontend/src/components/dashboard/ClinicalConsoleTabs.tsx](frontend/src/components/dashboard/ClinicalConsoleTabs.tsx)
+- MedGuardian Agent panel: [frontend/src/components/dashboard/AkashaAgentPanel.tsx](frontend/src/components/dashboard/AkashaAgentPanel.tsx)
+- doctor command surface: [frontend/src/components/dashboard/DoctorView.tsx](frontend/src/components/dashboard/DoctorView.tsx)
+- professional network panel: [frontend/src/components/dashboard/ProfessionalNetworkPanel.tsx](frontend/src/components/dashboard/ProfessionalNetworkPanel.tsx)
+- cost telemetry panel: [frontend/src/components/dashboard/CostTelemetryPanel.tsx](frontend/src/components/dashboard/CostTelemetryPanel.tsx)
+- API client wiring: [frontend/src/lib/api.ts](frontend/src/lib/api.ts)
+
+## Key APIs
+
+- `GET /api/agents/kernel/status`
+- `POST /api/medguardian/chat`
+- `POST /api/medguardian/symptoms`
+- `GET /api/medguardian/:id/timeline`
+- `POST /api/medguardian/doctor/brief`
+- `POST /api/medguardian/alerts/escalate`
+- `POST /api/medguardian/audit/anchor`
+- `GET /api/medguardian/audit/verify/:event_id`
+- `GET /api/cost/overview`
+
+Privileged service-to-service routes:
+
+- `GET /api/cre/private/summary`
+- `POST /api/cre/request`
+- `POST /api/cre/dispatch`
+
+## Proof Runbook
+
+Deterministic end-to-end privacy proof:
+
+```bash
+./scripts/proof-privacy-runbook.sh
+```
+
+Then capture CRE CLI simulation evidence:
 
 ```bash
 cre login
@@ -239,20 +432,34 @@ cd cre-cli-proof
 cre workflow simulate medguardian-proof --target staging-settings --non-interactive --trigger-index 0 --http-payload '{"patientId":"sarah","commitId":"0x1111111111111111111111111111111111111111111111111111111111111111"}'
 ```
 
-This script prints judge-ready proof fields:
+This produces judge-ready proof fields:
 
-- `requestId`, `receiptHash`, `txHash`
-- `writeMode`, `summaryTransportMode`
-- `anchorMode`, `hashChainValid`, `anchorDigestValid`
-- CLI prerequisite status for CRE simulation capture
+- `requestId`
+- `receiptHash`
+- `txHash`
+- `writeMode`
+- `summaryTransportMode`
+- `anchorMode`
+- `hashChainValid`
+- `anchorDigestValid`
 
-## Submission Script
+## Public Repo Safety Checklist
 
-Primary video script: [VIDEO-SCRIPT.md](VIDEO-SCRIPT.md)
+Before publishing or recording from a public deployment:
 
-Includes:
+1. Ensure `.env` and `.env.local` are not committed.
+2. Run the safety and functionality audit.
 
-- preflight
-- deterministic seeders
-- MedGuardian Agent click-path
-- full narration blocks
+```bash
+./scripts/public-repo-audit.sh full
+```
+
+3. Rotate any key that was ever real in a local `.env`.
+4. Keep only placeholder secrets in `*.env.example`.
+
+## Submission Assets
+
+- primary video script: [VIDEO-SCRIPT.md](VIDEO-SCRIPT.md)
+- public release audit: [reports/public-release-audit-2026-03-05.md](reports/public-release-audit-2026-03-05.md)
+- judge click-path reference: [reports/final-judge-click-path.md](reports/final-judge-click-path.md)
+

@@ -1,8 +1,9 @@
 # Final Judge Click-Path
-Date: March 3, 2026
+Date: March 7, 2026
 Target duration: 4 minutes
 
-## Preflight (before recording)
+## Preflight
+
 ```bash
 cd /home/agent/chainlink-medpriv/medguardian
 ./scripts/hackathon-runbook.sh up
@@ -10,49 +11,66 @@ cd /home/agent/chainlink-medpriv/medguardian
 ```
 
 Expected:
-- Frontend reachable on `:3000`
-- Backend reachable on `:4000`
-- Network status enabled with marketplace + payouts
+
+- frontend reachable on `http://localhost:3000`
+- backend reachable on `http://localhost:4000/health`
+- network status enabled with marketplace and payouts
+
+If you are recording against a reverse-proxied deployment, use the public root URL instead of `localhost`.
 
 ## Live Click-Path
 
-1. Open dashboard root (`/`) and keep full-page view.
-   Evidence: one-page non-scrolling shell, live simulation stats in header.
+1. Open the dashboard root and keep the full-page desktop layout visible.
+   Evidence: one-screen layout with patient roster on the left, workspace in the center, and `Clinical Console` on the right.
 
-2. In center Arc tabs, click `Patient Journey`, then `Doctor Command`, then `CRE Flow`.
-   Evidence: all center views render without route change.
+2. In the header, point out the `Arc` and `Cost` switch plus the live simulation controls.
+   Evidence: simulation status, start/pause/reset, and `Explain Mode` are visible.
 
-3. In right console, open `Network Ops` (should already be default).
-   Evidence: Judge Demo Flow strip + Operator Controls visible.
+3. In `Arc`, click `Journey`.
+   Evidence: patient monitoring and active journey context are visible for the selected patient.
 
-4. Create a case via `Manual Case Intake` and click `Create Case`.
-   Evidence: success notice and open tasks increase.
+4. Click `Doctor`.
+   Evidence: clinician triage, access-control workflow, and validation surface render without route change.
 
-5. In `Open Queue`, click `Claim` on a matching-role task.
-   Evidence: claimed item moves to claimed workflow state.
+5. Click `Agent`.
+   Evidence: `Intake`, `Timeline`, `Care Plan`, `Doctor Brief`, and `Audit & Proof` are visible.
 
-6. In `My Claimed Tasks`, click `Submit`.
-   Evidence: task appears in `Submitted For Approval`.
+6. In `Agent`, generate or review a doctor brief, then show the audit proof area.
+   Evidence: runtime health, privacy status, and anchor or verify controls are visible in one panel.
 
-7. In `Submitted For Approval`, click `Approve`.
-   Evidence: paid status reflected and Paid Rewards metric increases.
+7. Click `CRE`.
+   Evidence: `CRE Pipeline` and status modules explain the Chainlink path and receipt generation.
 
-8. Switch right-console tab to `CRE Audit`.
-   Evidence: receipts + ledger entries visible.
+8. Click `Network`.
+   Evidence: `Judge Demo Flow` strip is visible with `Intake`, `Claim`, `Submit`, and `Approve + Pay`.
 
-9. Switch top module from `Arc` to `Cost`.
-   Evidence: cost telemetry panel shows receipt-backed metrics.
+9. In `Network`, create a case and progress at least one task through claim, submit, and approval.
+   Evidence: queue state changes and payout telemetry update in-place.
 
-10. End on Arc with all three proof points visible:
-    - live simulation status
-    - Network Ops progression
-    - audit/cost traceability already demonstrated
+10. Switch to `Cost`.
+    Evidence: receipt-backed metrics and recent receipts show transport mode, write mode, and tx links.
 
-## Recovery if Something Fails Mid-Demo
-- Refresh Network snapshot from panel refresh button.
-- Re-run backend checks:
-  - `curl http://localhost:4000/health`
-  - `curl http://localhost:4000/api/network/status`
-- Re-seed one case:
-  - `./scripts/hackathon-runbook.sh up`
+11. End on the one-screen story:
+    - patient signal comes in
+    - clinician validates it
+    - CRE makes the workflow auditable
+    - the network executes work
+    - cost and proof stay visible
 
+## Recovery If Something Fails Mid-Demo
+
+- refresh the page once
+- use the network panel refresh button
+- re-check backend health
+
+```bash
+curl http://localhost:4000/health
+curl http://localhost:4000/api/network/status
+```
+
+- re-seed demo activity if needed
+
+```bash
+./scripts/demo-validated-insight.sh
+./scripts/demo-medguardian-agent.sh
+```
