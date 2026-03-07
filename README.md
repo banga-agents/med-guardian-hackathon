@@ -366,12 +366,20 @@ All require `x-cre-service-key`.
 
 ## Chainlink Integration Map
 
+### CRE project configuration
+
+- active CRE project settings: [cre-workflows/project.yaml](cre-workflows/project.yaml)
+- active workflow settings: [cre-workflows/workflow.yaml](cre-workflows/workflow.yaml)
+- proof CRE project settings: [cre-cli-proof/project.yaml](cre-cli-proof/project.yaml)
+- proof workflow settings: [cre-cli-proof/medguardian-proof/workflow.yaml](cre-cli-proof/medguardian-proof/workflow.yaml)
+
 ### CRE workflow runtime
 
 - entrypoint and handlers: [cre-workflows/src/index.ts](cre-workflows/src/index.ts)
 - legacy dispatch reference: [cre-workflows/src/workflows/reportDispatch.ts](cre-workflows/src/workflows/reportDispatch.ts)
 - workflow config schema: [cre-workflows/src/types/config.ts](cre-workflows/src/types/config.ts)
 - EVM encoding utilities: [cre-workflows/src/utils/evmEncoding.ts](cre-workflows/src/utils/evmEncoding.ts)
+- proof simulation workflow: [cre-cli-proof/medguardian-proof/main.ts](cre-cli-proof/medguardian-proof/main.ts)
 
 ### Smart contracts
 
@@ -379,6 +387,7 @@ All require `x-cre-service-key`.
 - CRE consumer receiver template: [contracts/contracts/MedGuardianConsumer.sol](contracts/contracts/MedGuardianConsumer.sol)
 - receiver interface: [contracts/contracts/IReceiver.sol](contracts/contracts/IReceiver.sol)
 - deployment script: [contracts/deploy/00_deploy_health_access.ts](contracts/deploy/00_deploy_health_access.ts)
+- consumer deployment script: [contracts/deploy/01_deploy_medguardian_consumer.ts](contracts/deploy/01_deploy_medguardian_consumer.ts)
 
 ### Backend Chainlink and CRE bridge
 
@@ -462,4 +471,3 @@ Before publishing or recording from a public deployment:
 - primary video script: [VIDEO-SCRIPT.md](VIDEO-SCRIPT.md)
 - public release audit: [reports/public-release-audit-2026-03-05.md](reports/public-release-audit-2026-03-05.md)
 - judge click-path reference: [reports/final-judge-click-path.md](reports/final-judge-click-path.md)
-
