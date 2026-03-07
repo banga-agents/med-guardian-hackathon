@@ -1,3 +1,5 @@
+import 'dotenv/config';
+
 /**
  * Deterministic Golden Path Demo Script
  * request -> summary -> RequestCreated(event) -> writeReport -> UI receipt
@@ -9,6 +11,7 @@
  */
 
 const API_BASE = process.env.API_BASE_URL || 'http://localhost:4000';
+const CRE_SERVICE_KEY = process.env.CRE_MUTATION_API_KEY || process.env.CRE_PRIVATE_SUMMARY_KEY || '';
 
 const DOCTOR_ID = 'dr_chen';
 const PATIENT_ID = 'sarah';
@@ -23,6 +26,18 @@ async function fetchJSON<T>(url: string, init?: RequestInit): Promise<T> {
   }
   return parsed as T;
 }
+
+const buildCREHeaders = (): Record<string, string> => {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+
+  if (CRE_SERVICE_KEY) {
+    headers['x-cre-service-key'] = CRE_SERVICE_KEY;
+  }
+
+  return headers;
+};
 
 async function waitForReceipt(requestId: string, timeoutMs = 20_000): Promise<any> {
   const startedAt = Date.now();
@@ -112,7 +127,7 @@ async function main() {
     };
   }>(`${API_BASE}/api/cre/request`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: buildCREHeaders(),
     body: JSON.stringify({
       doctorId: DOCTOR_ID,
       patientId: PATIENT_ID,

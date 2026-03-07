@@ -1,3 +1,5 @@
+import 'dotenv/config';
+
 /**
  * Prime dashboard with live-timestamp CRE receipt so Cost/Audit panels are populated.
  *
@@ -8,6 +10,7 @@
 const API_BASE = process.env.API_BASE_URL || 'http://localhost:4000';
 const DOCTOR_ID = 'dr_chen';
 const PATIENT_ID = 'sarah';
+const CRE_SERVICE_KEY = process.env.CRE_MUTATION_API_KEY || process.env.CRE_PRIVATE_SUMMARY_KEY || '';
 
 async function fetchJSON<T>(url: string, init?: RequestInit): Promise<T> {
   const response = await fetch(url, init);
@@ -18,6 +21,18 @@ async function fetchJSON<T>(url: string, init?: RequestInit): Promise<T> {
   }
   return parsed as T;
 }
+
+const buildCREHeaders = (): Record<string, string> => {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+
+  if (CRE_SERVICE_KEY) {
+    headers['x-cre-service-key'] = CRE_SERVICE_KEY;
+  }
+
+  return headers;
+};
 
 async function waitForReceipt(requestId: string, timeoutMs = 15_000): Promise<any> {
   const startedAt = Date.now();
@@ -68,7 +83,7 @@ async function main() {
     data: { requestId: string; mode: string; receipt?: any };
   }>(`${API_BASE}/api/cre/request`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: buildCREHeaders(),
     body: JSON.stringify({
       doctorId: DOCTOR_ID,
       patientId: PATIENT_ID,

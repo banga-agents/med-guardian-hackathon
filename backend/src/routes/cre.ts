@@ -4,7 +4,7 @@
  */
 
 import { randomUUID } from 'crypto';
-import { Router } from 'express';
+import { Router, type Request, type Response } from 'express';
 import { AbiCoder, Contract, JsonRpcProvider, Wallet, keccak256, toUtf8Bytes } from 'ethers';
 import { z } from 'zod';
 import {
@@ -83,7 +83,7 @@ interface SummaryPayload {
 
 const abiCoder = AbiCoder.defaultAbiCoder();
 const DRIFT_SCALE = 100;
-const PRIVATE_SUMMARY_HEADER = 'x-cre-service-key';
+const CRE_SERVICE_HEADER = 'x-cre-service-key';
 const DEFAULT_PRIVACY_SECRET_REF = 'healthServiceKey';
 const requestContractAbi = [
   'function createRequest(string patientId,string doctorId,bytes32 commitId,string purpose,string[] categories,uint16 windowHours) returns (bytes32)',
@@ -163,6 +163,42 @@ const parsePrivateSummaryKey = (): string | null => {
     return null;
   }
   return value;
+};
+
+const parseMutationKey = (): string | null => {
+  const configured =
+    process.env.CRE_MUTATION_API_KEY
+    || process.env.CRE_PRIVATE_SUMMARY_KEY
+    || '';
+
+  const value = configured.trim();
+  if (!value) return null;
+  if (/^your[_-]|placeholder|example|changeme/i.test(value)) {
+    return null;
+  }
+  return value;
+};
+
+const authorizeCREMutation = (req: Request, res: Response): boolean => {
+  const expectedKey = parseMutationKey();
+  if (!expectedKey) {
+    res.status(503).json({
+      success: false,
+      error: 'CRE mutation service key is not configured',
+    });
+    return false;
+  }
+
+  const provided = req.header(CRE_SERVICE_HEADER) || '';
+  if (!provided || provided !== expectedKey) {
+    res.status(401).json({
+      success: false,
+      error: 'Unauthorized CRE mutation request',
+    });
+    return false;
+  }
+
+  return true;
 };
 
 const computeSeverity = (reading: VitalReading): number => {
@@ -630,7 +666,7 @@ router.get('/private/summary', (req, res) => {
       return;
     }
 
-    const provided = req.header(PRIVATE_SUMMARY_HEADER) || '';
+    const provided = req.header(CRE_SERVICE_HEADER) || '';
     if (!provided || provided !== expectedKey) {
       res.status(401).json({
         success: false,
@@ -667,6 +703,10 @@ router.get('/private/summary', (req, res) => {
 
 router.post('/request', async (req, res) => {
   try {
+    if (!authorizeCREMutation(req, res)) {
+      return;
+    }
+
     const payload = DispatchSchema.parse(req.body);
     const summary = resolveSummary(payload.patientId, payload.commitId, payload.windowHours);
     const receiverAddress =
@@ -754,6 +794,10 @@ router.post('/request', async (req, res) => {
 
 router.post('/dispatch', async (req, res) => {
   try {
+    if (!authorizeCREMutation(req, res)) {
+      return;
+    }
+
     const payload = DispatchSchema.parse(req.body);
     const dispatched = await dispatchCRERequest(payload);
 

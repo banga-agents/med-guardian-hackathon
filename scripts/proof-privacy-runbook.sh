@@ -6,6 +6,20 @@ API_BASE_URL="${API_BASE_URL:-http://127.0.0.1:4000}"
 PATIENT_ID="${PATIENT_ID:-sarah}"
 DOCTOR_ID="${DOCTOR_ID:-dr_chen}"
 WINDOW_HOURS="${WINDOW_HOURS:-24}"
+BACKEND_ENV_FILE="${ROOT_DIR}/backend/.env"
+
+if [[ -f "${BACKEND_ENV_FILE}" ]]; then
+  set -a
+  # shellcheck disable=SC1090
+  source "${BACKEND_ENV_FILE}"
+  set +a
+fi
+
+CRE_SERVICE_KEY="${CRE_MUTATION_API_KEY:-${CRE_PRIVATE_SUMMARY_KEY:-}}"
+dispatch_headers=(-H 'Content-Type: application/json')
+if [[ -n "${CRE_SERVICE_KEY}" ]]; then
+  dispatch_headers+=(-H "x-cre-service-key: ${CRE_SERVICE_KEY}")
+fi
 
 echo "== MedGuardian Privacy Proof Runbook =="
 echo "API: ${API_BASE_URL}"
@@ -47,7 +61,7 @@ dispatch_payload="$(cat <<JSON
 JSON
 )"
 
-dispatch_resp="$(curl -fsS -X POST "${API_BASE_URL}/api/cre/dispatch" -H 'Content-Type: application/json' -d "${dispatch_payload}")"
+dispatch_resp="$(curl -fsS -X POST "${API_BASE_URL}/api/cre/dispatch" "${dispatch_headers[@]}" -d "${dispatch_payload}")"
 request_id="$(printf '%s' "${dispatch_resp}" | json_get 'data.receipt.requestId')"
 receipt_hash="$(printf '%s' "${dispatch_resp}" | json_get 'data.receipt.receiptHash')"
 write_mode="$(printf '%s' "${dispatch_resp}" | json_get 'data.receipt.writeMode')"

@@ -155,10 +155,13 @@ Active CRE dispatch now supports confidential summary retrieval with explicit tr
 Required backend env for private summary route:
 
 - `CRE_PRIVATE_SUMMARY_KEY`
+- `CRE_MUTATION_API_KEY` (optional dedicated key for privileged CRE mutations; falls back to `CRE_PRIVATE_SUMMARY_KEY`)
 
 Private summary endpoint used by confidential workflow calls:
 
 - `GET /api/cre/private/summary` (requires `x-cre-service-key`)
+- `POST /api/cre/request` (requires `x-cre-service-key`)
+- `POST /api/cre/dispatch` (requires `x-cre-service-key`)
 
 ## Chainlink Integration Map
 
@@ -215,8 +218,8 @@ Before publishing:
 - MedGuardian escalation: `POST /api/medguardian/alerts/escalate` (legacy alias: `/api/alerts/escalate`)
 - MedGuardian audit anchor: `POST /api/medguardian/audit/anchor` (legacy alias: `/api/audit/anchor`)
 - MedGuardian audit verify: `GET /api/medguardian/audit/verify/:event_id` (legacy alias: `/api/audit/verify/:event_id`)
-- CRE request: `POST /api/cre/request`
-- CRE dispatch: `POST /api/cre/dispatch`
+- CRE request: `POST /api/cre/request` (service-to-service, requires `x-cre-service-key`)
+- CRE dispatch: `POST /api/cre/dispatch` (service-to-service, requires `x-cre-service-key`)
 - CRE private summary: `GET /api/cre/private/summary`
 - Cost overview: `GET /api/cost/overview`
 

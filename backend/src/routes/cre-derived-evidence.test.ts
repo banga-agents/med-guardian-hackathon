@@ -40,6 +40,7 @@ const toDerivedFeatureSet = (payload: {
 });
 
 describe('CRE derived evidence alignment', () => {
+  const CRE_SERVICE_KEY = 'mutation-key-test';
   let baseUrl = '';
   let server: ReturnType<express.Application['listen']>;
 
@@ -56,6 +57,7 @@ describe('CRE derived evidence alignment', () => {
   });
 
   afterAll(async () => {
+    delete process.env.CRE_MUTATION_API_KEY;
     await new Promise<void>((resolve, reject) => {
       server.close((error) => {
         if (error) reject(error);
@@ -65,18 +67,37 @@ describe('CRE derived evidence alignment', () => {
   });
 
   beforeEach(() => {
+    process.env.CRE_MUTATION_API_KEY = CRE_SERVICE_KEY;
     getSecureVitalsVault().clear();
     getReceiptStore().clear();
   });
 
-  const request = async <T>(path: string, init?: RequestInit): Promise<T> => {
+  const requestWithStatus = async <T>(path: string, init?: RequestInit): Promise<{ status: number; payload: T }> => {
     const response = await fetch(`${baseUrl}${path}`, init);
-    const payload = (await response.json()) as any;
-    if (!response.ok) {
+    const payload = (await response.json()) as T;
+    return {
+      status: response.status,
+      payload,
+    };
+  };
+
+  const request = async <T>(path: string, init?: RequestInit): Promise<T> => {
+    const response = await requestWithStatus<T>(path, init);
+    const payload = response.payload as any;
+    if (response.status < 200 || response.status >= 300) {
       throw new Error(`Request failed ${response.status} for ${path}: ${payload.error ?? 'unknown'}`);
     }
-    return payload as T;
+    return response.payload;
   };
+
+  const jsonHeaders = (): Record<string, string> => ({
+    'Content-Type': 'application/json',
+  });
+
+  const creHeaders = (): Record<string, string> => ({
+    ...jsonHeaders(),
+    'x-cre-service-key': CRE_SERVICE_KEY,
+  });
 
   const seedDiagnosticTimeline = async () => {
     const start = Date.parse('2026-01-10T00:00:00.000Z');
@@ -101,7 +122,7 @@ describe('CRE derived evidence alignment', () => {
         '/api/cre/seed',
         {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: jsonHeaders(),
           body: JSON.stringify(payload),
         }
       );
@@ -111,6 +132,50 @@ describe('CRE derived evidence alignment', () => {
 
     return latestCommitId;
   };
+
+  it('rejects signer-backed CRE mutations without the configured service key', async () => {
+    const commitId = await seedDiagnosticTimeline();
+
+    const requestResponse = await requestWithStatus<{ success: boolean; error: string }>(
+      '/api/cre/request',
+      {
+        method: 'POST',
+        headers: jsonHeaders(),
+        body: JSON.stringify({
+          doctorId: 'dr_chen',
+          patientId: 'sarah',
+          commitId,
+          purpose: 'fatigue_intake_pack_v1',
+          categories: ['vitals', 'symptoms'],
+          windowHours: 24,
+        }),
+      }
+    );
+
+    expect(requestResponse.status).toBe(401);
+    expect(requestResponse.payload.success).toBe(false);
+    expect(requestResponse.payload.error).toContain('Unauthorized CRE mutation request');
+
+    const dispatchResponse = await requestWithStatus<{ success: boolean; error: string }>(
+      '/api/cre/dispatch',
+      {
+        method: 'POST',
+        headers: jsonHeaders(),
+        body: JSON.stringify({
+          doctorId: 'dr_chen',
+          patientId: 'sarah',
+          commitId,
+          purpose: 'fatigue_intake_pack_v1',
+          categories: ['vitals', 'symptoms'],
+          windowHours: 24,
+        }),
+      }
+    );
+
+    expect(dispatchResponse.status).toBe(401);
+    expect(dispatchResponse.payload.success).toBe(false);
+    expect(dispatchResponse.payload.error).toContain('Unauthorized CRE mutation request');
+  });
 
   it('matches derived evidence between simulation features endpoint and CRE summary', async () => {
     const commitId = await seedDiagnosticTimeline();
@@ -167,7 +232,7 @@ describe('CRE derived evidence alignment', () => {
       };
     }>('/api/cre/dispatch', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: creHeaders(),
       body: JSON.stringify({
         doctorId: 'dr_chen',
         patientId: 'sarah',
@@ -215,7 +280,7 @@ describe('CRE derived evidence alignment', () => {
       };
     }>('/api/cre/request', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: creHeaders(),
       body: JSON.stringify({
         doctorId: 'dr_chen',
         patientId: 'sarah',
@@ -250,7 +315,7 @@ describe('CRE derived evidence alignment', () => {
 
     await request('/api/cre/dispatch', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: creHeaders(),
       body: JSON.stringify({
         doctorId: 'dr_chen',
         patientId: 'sarah',
