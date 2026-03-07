@@ -94,6 +94,25 @@ This panel is where the full human-in-the-loop flow becomes visible:
 - anchor an audit event
 - verify the resulting proof trail
 
+## Akasha Capabilities In MedGuardian
+
+Akasha is the intelligence and governance layer inside MedGuardian. In this project, Akasha is responsible for:
+
+- patient-side intake and follow-up messaging
+- symptom logging and structured timeline building
+- longitudinal signal detection such as worsening trends, severity drift, and adherence risk
+- clinician-facing doctor brief generation with evidence and open questions
+- support-message generation for patient and clinician contexts
+- audit event creation, hash-linked traceability, and proof verification
+- controlled anchoring of important audit bundles with explicit `onchain` or `simulated` provenance
+- graceful deterministic fallback when live LLM providers are unavailable
+
+Akasha does not autonomously diagnose or prescribe. The system is intentionally human-in-the-loop:
+
+- clinicians validate recommendations
+- access to sensitive evidence remains controlled
+- onchain proof is used for accountability, not for storing raw patient data
+
 #### `CRE`
 
 The CRE view explains the Chainlink path.
