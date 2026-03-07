@@ -2,6 +2,7 @@
   "name": "@medguardian/contracts",
   "version": "1.0.0",
   "description": "Smart contracts for MedGuardian privacy-preserving health data",
+  "license": "MIT",
   "scripts": {
     "compile": "hardhat compile",
     "test": "hardhat test",

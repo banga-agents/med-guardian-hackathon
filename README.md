@@ -107,6 +107,15 @@ Akasha is the intelligence and governance layer inside MedGuardian. In this proj
 - controlled anchoring of important audit bundles with explicit `onchain` or `simulated` provenance
 - graceful deterministic fallback when live LLM providers are unavailable
 
+What makes Akasha distinctive in this demo is not just that it can generate text. It carries state, time, and governance:
+
+- `Case memory system`: Akasha stores structured per-case memory, hashes entries, and reuses that memory when building follow-ups, clinician support, and handoff context.
+- `Patient memory lane`: MedGuardian keeps a per-patient memory stream of chats, reflections, and workflow artifacts, then persists those records for continuity across sessions.
+- `Inner clock`: the system reasons against a simulated patient day, cycle day, and care phase, so the same patient can move through onset, escalation, and recovery instead of behaving like a stateless chatbot.
+- `Blueprint-driven governance`: Akasha loads medical rules and workflow registries from the Med Akasha blueprint, evaluates actions before execution, and can allow, block, or require approval.
+- `Hash-linked audit chain`: important actions are appended to an integrity chain, then verified later with digest checks and optional blockchain anchoring.
+- `Dual-audience reasoning`: Akasha can speak differently to patients and clinicians, which matters in healthcare because empathy, evidence, and escalation language are not the same thing.
+
 Akasha does not autonomously diagnose or prescribe. The system is intentionally human-in-the-loop:
 
 - clinicians validate recommendations
@@ -490,3 +499,7 @@ Before publishing or recording from a public deployment:
 - primary video script: [VIDEO-SCRIPT.md](VIDEO-SCRIPT.md)
 - public release audit: [reports/public-release-audit-2026-03-05.md](reports/public-release-audit-2026-03-05.md)
 - judge click-path reference: [reports/final-judge-click-path.md](reports/final-judge-click-path.md)
+
+## License
+
+This repository is released under the MIT License. See [LICENSE](LICENSE).
