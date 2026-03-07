@@ -3,12 +3,26 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 RUNLOG_DIR="${ROOT_DIR}/.runlogs"
+BACKEND_ENV_FILE="${ROOT_DIR}/backend/.env"
 BACKEND_URL="${BACKEND_URL:-http://127.0.0.1:4000}"
 FRONTEND_HOST="${FRONTEND_HOST:-0.0.0.0}"
 FRONTEND_PORT="${FRONTEND_PORT:-3000}"
 CHAIN_RPC_URL="${CHAIN_RPC_URL:-http://127.0.0.1:8545}"
 DEFAULT_HARDHAT_PRIVATE_KEY="0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
 BACKEND_PRIVATE_KEY="${BACKEND_PRIVATE_KEY:-${DEFAULT_HARDHAT_PRIVATE_KEY}}"
+
+if [[ -f "${BACKEND_ENV_FILE}" ]]; then
+  set -a
+  # shellcheck disable=SC1090
+  source "${BACKEND_ENV_FILE}"
+  set +a
+fi
+
+CRE_SERVICE_KEY="${CRE_MUTATION_API_KEY:-${CRE_PRIVATE_SUMMARY_KEY:-}}"
+cre_headers=()
+if [[ -n "${CRE_SERVICE_KEY}" ]]; then
+  cre_headers=(-H "x-cre-service-key: ${CRE_SERVICE_KEY}")
+fi
 
 mkdir -p "${RUNLOG_DIR}"
 
@@ -111,7 +125,7 @@ start_frontend() {
 reset_demo_state() {
   echo "Resetting simulation + CRE deterministic state..."
   curl -fsS -X POST "${BACKEND_URL}/api/simulation/stop" >/dev/null || true
-  curl -fsS -X POST "${BACKEND_URL}/api/cre/reset" >/dev/null || true
+  curl -fsS -X POST "${BACKEND_URL}/api/cre/reset" "${cre_headers[@]}" >/dev/null || true
 }
 
 start_simulation() {

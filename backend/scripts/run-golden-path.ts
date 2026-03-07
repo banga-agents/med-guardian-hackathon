@@ -63,7 +63,7 @@ async function main() {
     `${API_BASE}/api/cre/seed`,
     {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: buildCREHeaders(),
       body: JSON.stringify({
         patientId: PATIENT_ID,
         timestamp: TIMESTAMP,

@@ -122,7 +122,7 @@ describe('CRE derived evidence alignment', () => {
         '/api/cre/seed',
         {
           method: 'POST',
-          headers: jsonHeaders(),
+          headers: creHeaders(),
           body: JSON.stringify(payload),
         }
       );
@@ -326,7 +326,10 @@ describe('CRE derived evidence alignment', () => {
       }),
     });
 
-    await request('/api/cre/reset', { method: 'POST' });
+    await request('/api/cre/reset', {
+      method: 'POST',
+      headers: creHeaders(),
+    });
 
     const receipts = await request<{ success: boolean; data: Array<{ id: string }> }>(
       '/api/cre/receipts?patientId=sarah&limit=5'

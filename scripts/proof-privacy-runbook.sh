@@ -16,9 +16,9 @@ if [[ -f "${BACKEND_ENV_FILE}" ]]; then
 fi
 
 CRE_SERVICE_KEY="${CRE_MUTATION_API_KEY:-${CRE_PRIVATE_SUMMARY_KEY:-}}"
-dispatch_headers=(-H 'Content-Type: application/json')
+cre_headers=(-H 'Content-Type: application/json')
 if [[ -n "${CRE_SERVICE_KEY}" ]]; then
-  dispatch_headers+=(-H "x-cre-service-key: ${CRE_SERVICE_KEY}")
+  cre_headers+=(-H "x-cre-service-key: ${CRE_SERVICE_KEY}")
 fi
 
 echo "== MedGuardian Privacy Proof Runbook =="
@@ -44,7 +44,7 @@ seed_payload="$(cat <<JSON
 JSON
 )"
 
-seed_resp="$(curl -fsS -X POST "${API_BASE_URL}/api/cre/seed" -H 'Content-Type: application/json' -d "${seed_payload}")"
+seed_resp="$(curl -fsS -X POST "${API_BASE_URL}/api/cre/seed" "${cre_headers[@]}" -d "${seed_payload}")"
 commit_id="$(printf '%s' "${seed_resp}" | json_get 'data.commitId')"
 echo "   commitId=${commit_id}"
 
@@ -61,7 +61,7 @@ dispatch_payload="$(cat <<JSON
 JSON
 )"
 
-dispatch_resp="$(curl -fsS -X POST "${API_BASE_URL}/api/cre/dispatch" "${dispatch_headers[@]}" -d "${dispatch_payload}")"
+dispatch_resp="$(curl -fsS -X POST "${API_BASE_URL}/api/cre/dispatch" "${cre_headers[@]}" -d "${dispatch_payload}")"
 request_id="$(printf '%s' "${dispatch_resp}" | json_get 'data.receipt.requestId')"
 receipt_hash="$(printf '%s' "${dispatch_resp}" | json_get 'data.receipt.receiptHash')"
 write_mode="$(printf '%s' "${dispatch_resp}" | json_get 'data.receipt.writeMode')"

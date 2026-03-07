@@ -7,6 +7,7 @@ import { getSecureVitalsVault } from '../services/privacy/SecureVitalsVault';
 import { getReceiptStore } from '../services/cre/ReceiptStore';
 
 describe('CRE private summary route', () => {
+  const CRE_SERVICE_KEY = 'mutation-key-test';
   let baseUrl = '';
   let server: ReturnType<express.Application['listen']>;
 
@@ -32,6 +33,7 @@ describe('CRE private summary route', () => {
 
   beforeEach(() => {
     process.env.CRE_PRIVATE_SUMMARY_KEY = 'private-key-test';
+    process.env.CRE_MUTATION_API_KEY = CRE_SERVICE_KEY;
     getSecureVitalsVault().clear();
     getReceiptStore().clear();
   });
@@ -51,7 +53,10 @@ describe('CRE private summary route', () => {
       data: { commitId: string };
     }>('/api/cre/seed', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-cre-service-key': CRE_SERVICE_KEY,
+      },
       body: JSON.stringify({
         patientId: 'sarah',
         timestamp: Date.parse('2026-01-10T12:00:00.000Z'),

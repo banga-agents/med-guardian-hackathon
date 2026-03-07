@@ -604,6 +604,10 @@ export const dispatchCRERequest = async (
 
 router.post('/seed', (req, res) => {
   try {
+    if (!authorizeCREMutation(req, res)) {
+      return;
+    }
+
     const payload = SeedSchema.parse(req.body);
     const timestamp = payload.timestamp ?? Date.now();
     const vault = getSecureVitalsVault();
@@ -818,7 +822,11 @@ router.post('/dispatch', async (req, res) => {
   }
 });
 
-router.post('/reset', (_req, res) => {
+router.post('/reset', (req, res) => {
+  if (!authorizeCREMutation(req, res)) {
+    return;
+  }
+
   getSecureVitalsVault().clear();
   getReceiptStore().clear();
 
