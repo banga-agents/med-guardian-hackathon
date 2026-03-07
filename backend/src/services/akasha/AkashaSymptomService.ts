@@ -835,6 +835,7 @@ export class AkashaSymptomService extends EventEmitter {
     patientId: PatientId;
     commitId: `0x${string}`;
     workflowId: string;
+    allowOnchain?: boolean;
   }): Promise<{ txHash: string; requestId: string; mode: 'onchain' | 'simulated'; chainRef: string }> {
     const chainRef =
       process.env.MEDGUARDIAN_AUDIT_CHAIN_REF
@@ -851,7 +852,7 @@ export class AkashaSymptomService extends EventEmitter {
     const fallbackRequestId = `audit-${input.patientId}-${input.commitId.slice(2, 10)}`;
     const fallbackTxHash = `0x${sha256(`audit-anchor:${input.commitId}`).slice(0, 64)}`;
 
-    if (!receiverAddress || !rpcUrl || !privateKeyRaw) {
+    if (!input.allowOnchain || !receiverAddress || !rpcUrl || !privateKeyRaw) {
       return {
         txHash: fallbackTxHash,
         requestId: fallbackRequestId,
@@ -914,9 +915,10 @@ export class AkashaSymptomService extends EventEmitter {
     traceId: string;
     workflowId?: string;
     anchoredBy?: string;
+    allowOnchain?: boolean;
   }): Promise<{ traceId: string; anchor: AuditAnchorRecord }> {
     const existing = this.anchorByEventId.get(input.eventId);
-    if (existing) {
+    if (existing && (existing.anchorMode === 'onchain' || !input.allowOnchain)) {
       return {
         traceId: input.traceId,
         anchor: existing,
@@ -945,6 +947,7 @@ export class AkashaSymptomService extends EventEmitter {
       patientId,
       commitId,
       workflowId,
+      allowOnchain: input.allowOnchain,
     });
 
     const anchor: AuditAnchorRecord = {

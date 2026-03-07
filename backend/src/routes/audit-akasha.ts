@@ -1,9 +1,10 @@
-import { Router } from 'express';
+import { Router, type Request, type Response } from 'express';
 import { randomUUID } from 'crypto';
 import { z } from 'zod';
 import { getAkashaSymptomService } from '../services/akasha/AkashaSymptomService';
 
 const router = Router();
+const CRE_SERVICE_HEADER = 'x-cre-service-key';
 
 const AnchorSchema = z.object({
   eventId: z.string().min(1).max(120),
@@ -19,10 +20,54 @@ function resolveTraceId(req: { headers: { [key: string]: any } }): string {
   return `trace-${randomUUID()}`;
 }
 
+const parseMutationKey = (): string | null => {
+  const configured =
+    process.env.CRE_MUTATION_API_KEY
+    || process.env.CRE_PRIVATE_SUMMARY_KEY
+    || '';
+
+  const value = configured.trim();
+  if (!value) return null;
+  if (/^your[_-]|placeholder|example|changeme/i.test(value)) {
+    return null;
+  }
+  return value;
+};
+
+const resolveOnchainAuditPermission = (req: Request, res: Response): boolean | null => {
+  const provided = req.header(CRE_SERVICE_HEADER) || '';
+  if (!provided) {
+    return false;
+  }
+
+  const expectedKey = parseMutationKey();
+  if (!expectedKey) {
+    res.status(503).json({
+      success: false,
+      error: 'CRE mutation service key is not configured',
+    });
+    return null;
+  }
+
+  if (provided !== expectedKey) {
+    res.status(401).json({
+      success: false,
+      error: 'Unauthorized audit anchor request',
+    });
+    return null;
+  }
+
+  return true;
+};
+
 router.post('/anchor', async (req, res) => {
   try {
     const payload = AnchorSchema.parse(req.body);
     const traceId = resolveTraceId(req);
+    const allowOnchain = resolveOnchainAuditPermission(req, res);
+    if (allowOnchain === null) {
+      return;
+    }
     const service = getAkashaSymptomService();
 
     const result = await service.anchorAuditEvent({
@@ -30,6 +75,7 @@ router.post('/anchor', async (req, res) => {
       workflowId: payload.workflowId,
       anchoredBy: payload.anchoredBy,
       traceId,
+      allowOnchain,
     });
 
     res.json({

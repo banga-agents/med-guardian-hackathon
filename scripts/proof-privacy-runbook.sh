@@ -101,9 +101,9 @@ anchor_payload="$(cat <<JSON
 }
 JSON
 )"
-anchor_resp="$(curl -fsS -X POST "${API_BASE_URL}/api/medguardian/audit/anchor" -H 'Content-Type: application/json' -d "${anchor_payload}" || true)"
+anchor_resp="$(curl -fsS -X POST "${API_BASE_URL}/api/medguardian/audit/anchor" "${cre_headers[@]}" -d "${anchor_payload}" || true)"
 if [[ -z "${anchor_resp}" ]]; then
-  anchor_resp="$(curl -fsS -X POST "${API_BASE_URL}/api/audit/anchor" -H 'Content-Type: application/json' -d "${anchor_payload}")"
+  anchor_resp="$(curl -fsS -X POST "${API_BASE_URL}/api/audit/anchor" "${cre_headers[@]}" -d "${anchor_payload}")"
 fi
 anchor_mode="$(printf '%s' "${anchor_resp}" | json_get 'data.anchor.anchorMode')"
 anchor_tx="$(printf '%s' "${anchor_resp}" | json_get 'data.anchor.txHash')"

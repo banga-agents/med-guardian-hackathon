@@ -216,7 +216,7 @@ Before publishing:
 - MedGuardian timeline: `GET /api/medguardian/:id/timeline` (legacy alias: `/api/patient/:id/timeline`)
 - MedGuardian doctor brief: `POST /api/medguardian/doctor/brief` (legacy alias: `/api/doctor/brief`)
 - MedGuardian escalation: `POST /api/medguardian/alerts/escalate` (legacy alias: `/api/alerts/escalate`)
-- MedGuardian audit anchor: `POST /api/medguardian/audit/anchor` (legacy alias: `/api/audit/anchor`)
+- MedGuardian audit anchor: `POST /api/medguardian/audit/anchor` (legacy alias: `/api/audit/anchor`; public calls simulate, `x-cre-service-key` enables onchain anchoring)
 - MedGuardian audit verify: `GET /api/medguardian/audit/verify/:event_id` (legacy alias: `/api/audit/verify/:event_id`)
 - CRE request: `POST /api/cre/request` (service-to-service, requires `x-cre-service-key`)
 - CRE dispatch: `POST /api/cre/dispatch` (service-to-service, requires `x-cre-service-key`)

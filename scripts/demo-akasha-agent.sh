@@ -1,9 +1,20 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+BACKEND_ENV_FILE="${ROOT_DIR}/backend/.env"
 BASE_URL="${BASE_URL:-http://localhost:4000}"
 PATIENT_ID="${PATIENT_ID:-sarah}"
 TRACE_ID="trace-akasha-$(date +%s)"
+
+if [[ -f "${BACKEND_ENV_FILE}" ]]; then
+  set -a
+  # shellcheck disable=SC1090
+  source "${BACKEND_ENV_FILE}"
+  set +a
+fi
+
+CRE_SERVICE_KEY="${CRE_MUTATION_API_KEY:-${CRE_PRIVATE_SUMMARY_KEY:-}}"
 
 need_cmd() {
   command -v "$1" >/dev/null 2>&1 || {
@@ -27,9 +38,15 @@ health() {
 post_json() {
   local path="$1"
   local payload="$2"
+  local headers=(
+    -H 'Content-Type: application/json'
+    -H "x-trace-id: $TRACE_ID"
+  )
+  if [[ -n "${CRE_SERVICE_KEY}" ]]; then
+    headers+=(-H "x-cre-service-key: ${CRE_SERVICE_KEY}")
+  fi
   curl -fsS -X POST "$BASE_URL$path" \
-    -H 'Content-Type: application/json' \
-    -H "x-trace-id: $TRACE_ID" \
+    "${headers[@]}" \
     -d "$payload"
 }
 
