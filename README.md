@@ -504,7 +504,10 @@ Before publishing or recording from a public deployment:
 
 This repository is source-available under the PolyForm Noncommercial License 1.0.0.
 
+- this public repository exists for hackathon judging, technical review, learning, and noncommercial community collaboration
+- the project and its IP remain owned by the MedGuardian authors
 - commercial use is not permitted under this repo license
 - noncommercial use, research, experimentation, and evaluation are allowed under the license terms
+- if you want to build on MedGuardian commercially, that requires separate permission from the authors
 
 See [LICENSE](LICENSE).
