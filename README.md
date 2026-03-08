@@ -502,4 +502,9 @@ Before publishing or recording from a public deployment:
 
 ## License
 
-This repository is released under the MIT License. See [LICENSE](LICENSE).
+This repository is source-available under the PolyForm Noncommercial License 1.0.0.
+
+- commercial use is not permitted under this repo license
+- noncommercial use, research, experimentation, and evaluation are allowed under the license terms
+
+See [LICENSE](LICENSE).

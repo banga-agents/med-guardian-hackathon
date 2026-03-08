@@ -6,7 +6,7 @@
   "scripts": {
     "postinstall": "bun x cre-setup"
   },
-  "license": "MIT",
+  "license": "PolyForm-Noncommercial-1.0.0",
   "dependencies": {
     "@chainlink/cre-sdk": "^1.1.1"
   },

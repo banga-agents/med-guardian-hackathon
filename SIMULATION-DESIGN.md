@@ -108,7 +108,7 @@ interface PatientAgent {
 ### ERC-8004 Agent Contract (Simplified)
 
 ```solidity
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 pragma solidity ^0.8.19;
 
 /**

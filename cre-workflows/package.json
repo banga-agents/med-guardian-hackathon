@@ -2,7 +2,7 @@
   "name": "@medguardian/cre-workflows",
   "version": "1.0.0",
   "description": "Chainlink CRE workflows for MedGuardian privacy-preserving health data",
-  "license": "MIT",
+  "license": "PolyForm-Noncommercial-1.0.0",
   "type": "module",
   "main": "dist/index.js",
   "scripts": {
